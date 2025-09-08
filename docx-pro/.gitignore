@@ -1,0 +1,26 @@
+# macOS / IDE
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn.lock
+pnpm-lock.yaml
+
+# Builds / coverage
+dist/
+build/
+coverage/
+
+# Client & Server (למקרה של הפעלה נפרדת)
+client/node_modules/
+client/dist/
+server/node_modules/
+server/dist/
+
+# Env / secrets
+.env
+.env.*

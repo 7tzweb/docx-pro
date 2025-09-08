@@ -1,0 +1,142 @@
+:root{
+  /* מידות A4 (לסימולציה/פרינט בלבד) */
+  --page-w-a4: 210mm;
+  --page-h-a4: 297mm;
+  --page-pad-a4: 20mm;
+
+  /* תצוגת מסך מלאה: */
+  --max: 1600px; /* רוחב עבודה מקסימלי (אפשר להגדיל אם תרצה) */
+
+  /* צבעים/טיפוגרפיה */
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --text: #0b1220;
+  --muted: #667085;
+  --primary: #2563eb;
+  --primary-2: #1d4ed8;
+  --border: #e6e8ee;
+
+  --radius-xl: 18px;
+  --radius-md: 12px;
+  --shadow-xl: 0 30px 80px rgba(2, 6, 23, .08);
+  --shadow-md: 0 12px 28px rgba(2, 6, 23, .06);
+
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+*{ box-sizing:border-box; }
+html, body, #root{ height:100%; }
+body{
+  margin:0;
+  background:
+    radial-gradient(900px 600px at 78% -10%, rgba(37,99,235,.08), transparent 70%),
+    radial-gradient(1000px 700px at 10% 120%, rgba(37,99,235,.07), transparent 50%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Inter", system-ui, -apple-system, "Segoe UI", Arial, Helvetica, sans-serif;
+  direction: rtl;
+}
+
+/* נטרול דמו של Vite */
+body,#root{ display:block !important; max-width:none !important; padding:0 !important; margin:0 !important; text-align:initial !important; }
+
+/* ====== HEADER ====== */
+.header{
+  position: sticky; top:0; z-index:40;
+  backdrop-filter:saturate(160%) blur(8px);
+  background:rgba(255,255,255,.9);
+  border-bottom:1px solid var(--border);
+}
+.container{ width:100%; max-width:var(--max); margin:0 auto; padding:14px 22px; }
+.toprow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.process-pill{
+  padding:10px 14px; background:var(--panel); border:1px solid var(--border);
+  border-radius:999px; font-weight:600; box-shadow: var(--shadow-md);
+}
+
+/* ====== STEPS/ACTIONS ====== */
+.steps{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+.step{
+  padding:10px 14px; background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius-md); color:var(--muted); cursor:pointer; transition:.15s ease;
+}
+.step:hover{ transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.step.active{ color:#0b2a75; border-color:rgba(37,99,235,.35); background:#eef2ff; font-weight:600; }
+
+.actions{
+  margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:center;
+}
+.actions .right{ justify-self:start; display:flex; gap:10px; }
+.actions .left{ justify-self:end; display:flex; gap:10px; }
+
+.btn{
+  appearance:none; cursor:pointer;
+  border:1px solid var(--border); background:var(--panel); color:var(--text);
+  padding:10px 16px; border-radius:var(--radius-md);
+  transition:.15s ease; box-shadow:0 2px 0 rgba(0,0,0,.02);
+}
+.btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-md); }
+.btn[disabled]{ opacity:.6; cursor:not-allowed; }
+.btn-primary{ background:linear-gradient(180deg, var(--primary), var(--primary-2)); color:#fff; border-color:transparent; }
+
+/* ====== WORKSPACE ====== */
+.main{ padding:24px 16px 48px; }
+
+/* עמוד עבודה */
+.stage{ width:100%; max-width:var(--max); margin:0 auto; }
+
+/* ברירת מחדל: תצוגת מסך מלאה – העמוד ממלא כמעט את כל הרוחב */
+.workspace.full .page{
+  width:100%;
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);
+  padding:28px; margin:18px auto 48px;
+  min-height: min(1100px, calc(100vh - 220px));
+}
+
+/* אופציה: סימולציית A4 בתוך הדפדפן */
+.workspace.a4 .page{
+  width:var(--page-w-a4); min-height:var(--page-h-a4);
+  max-width:calc(100vw - 48px);
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);
+  padding:var(--page-pad-a4); margin:18px auto 48px;
+}
+
+/* כותרת המסמך */
+.input-title{
+  width:100%; padding:12px 14px; background:#fbfcff;
+  border:1px solid var(--border); border-radius:var(--radius-md);
+  font-size:18px; font-weight:600; margin-bottom:14px;
+}
+
+/* ====== TinyMCE – טולבר עטיף ורווח קומפקטי ====== */
+.tiny-wrap .tox-tinymce{
+  border-radius: 12px; box-shadow: var(--shadow-md);
+}
+.tiny-wrap .tox .tox-toolbar__primary{
+  flex-wrap: wrap; gap: 4px 6px;
+}
+.tiny-wrap .tox .tox-tbtn{ padding-inline: 6px; }
+.tiny-wrap .tox .tox-editor-header{ position: sticky; top: 0; z-index: 10; }
+
+/* ====== Swagger / Code ====== */
+.swagger-area{
+  width:100%; height:640px; resize:vertical;
+  font-family:var(--mono); font-size:14px; line-height:1.6;
+  border:1px solid var(--border); border-radius:12px; padding:14px; background:#f9fafb;
+}
+.code-area{
+  width:100%; min-height:640px; font-family:var(--mono);
+  background:#0b1220; color:#e8eef9; border-radius:12px; padding:16px; overflow:auto;
+  border:1px solid #0f172a;
+}
+
+/* פרינט – תמיד A4 (רלוונטי רק להדפסה, הייצוא לוורד מתבצע בשרת) */
+@page { size: A4; margin: 20mm; }
+
+/* מובייל */
+@media (max-width:1024px){
+  .actions{ grid-template-columns:1fr; }
+}

@@ -1,4 +1,5 @@
 import React from "react";
+import ProjectPicker from "./ProjectPicker"; // בוחר פרויקט עם חיפוש
 
 /**
  * AppHeader – כותרת עליונה + ניווט שלבים + פעולות
@@ -21,10 +22,13 @@ import React from "react";
  *  - downloadWord()
  *  - downloadSwagger()
  *  - downloadCode()
- *  - generateSwagger()
+ *  - generateSwagger()  // היסטורי: בזרימה החדשה לא בשימוש מהכותרת (הבנייה נעשית אוטומטית)
  *  - generateCode()
  *  - lang, onChangeLang(value)
  *  - swaggerText (טקסט קיים לצורך Disable של יצירת קוד)
+ *
+ *  - readySteps: {1:boolean, 2:boolean, 3:boolean} – אילו שלבים מוכנים לניווט (בזמן בנייה מוצג לודר קטן)
+ *  - building: האם מתבצעת בנייה/הכנה של השלבים (אופציונלי, להצגת סטטוס)
  */
 export default function AppHeader({
   proc,
@@ -46,12 +50,35 @@ export default function AppHeader({
   downloadWord,
   downloadSwagger,
   downloadCode,
-  generateSwagger,
+  generateSwagger, // נשמר לשם תאימות לאחור; לא מופעל מכאן בזרימה החדשה
   generateCode,
   lang,
   onChangeLang,
   swaggerText,
+
+  // חדשים/אופציונליים:
+  readySteps = { 1: true, 2: true, 3: true },
+  building,
 }) {
+  // כפתור שלב עם נעילה עד שהשלב מוכן
+  const StepBtn = ({ n, children }) => {
+    const active = step === n;
+    const ready = !!readySteps[n];
+    const disabled = !ready;
+
+    return (
+      <div
+        className={`step ${active ? "active" : ""} ${disabled ? "disabled" : ""}`}
+        title={disabled ? "השלב עדיין נבנה…" : ""}
+        onClick={() => !disabled && onGotoStep?.(n)}
+        style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
+      >
+        {children}
+        {!ready && <span aria-hidden style={{ fontSize: 12 }}>⏳</span>}
+      </div>
+    );
+  };
+
   return (
     <div className="header">
       <div className="container">
@@ -65,28 +92,12 @@ export default function AppHeader({
             </div>
           )}
 
-          {/* בחירת פרויקט */}
-          <select
-            onChange={(e) => e.target.value && onLoadProject?.(e.target.value)}
-            defaultValue=""
-            style={{
-              marginInlineStart: "12px",
-              padding: "10px 12px",
-              border: "1px solid var(--border)",
-              borderRadius: "12px",
-              background: "#fff",
-              color: "var(--text)",
-            }}
-          >
-            <option value="" disabled>
-              פתח פרויקט…
-            </option>
-            {(projects || []).map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name} — {new Date(p.updatedAt).toLocaleDateString()}
-              </option>
-            ))}
-          </select>
+          {/* בחירת פרויקט – עם חיפוש (ProjectPicker) */}
+          <ProjectPicker
+            projects={projects || []}
+            onSelect={(id) => id && onLoadProject?.(id)}
+            buttonStyle={{ marginInlineStart: 12 }}
+          />
 
           {/* יצירה/עריכה */}
           <button className="btn btn-primary" style={{ marginInlineStart: 8 }} onClick={onCreateProject}>
@@ -112,39 +123,38 @@ export default function AppHeader({
           </div>
         </div>
 
-        {/* שלבים */}
+        {/* שלבים – ניווט חופשי כשהשלב מוכן */}
         <div className="steps">
-          <div className={`step ${step === 1 ? "active" : ""}`} onClick={() => onGotoStep?.(1)}>
-            שלב 1: אפיון
-          </div>
-          <div className={`step ${step === 2 ? "active" : ""}`} onClick={() => onGotoStep?.(2)}>
-            שלב 2: Swagger
-          </div>
-          <div className={`step ${step === 3 ? "active" : ""}`} onClick={() => onGotoStep?.(3)}>
-            שלב 3: קוד
-          </div>
+          <StepBtn n={1}>שלב 1: אפיון</StepBtn>
+          <StepBtn n={2}>שלב 2: Swagger</StepBtn>
+          <StepBtn n={3}>שלב 3: קוד</StepBtn>
         </div>
 
         {/* פעולות */}
         <div className="actions">
           <div className="right">
             {step === 1 && (
-              <button className="btn" onClick={downloadWord} disabled={!!loading}>
+              <button className="btn" onClick={downloadWord} disabled={!!loading || !readySteps[1]}>
                 {loading ? "יוצר…" : "הורד Word"}
               </button>
             )}
-            {step === 2 && <button className="btn" onClick={downloadSwagger}>הורד Swagger</button>}
-            {step === 3 && <button className="btn" onClick={downloadCode}>הורד קוד</button>}
+            {step === 2 && (
+              <button className="btn" onClick={downloadSwagger} disabled={!readySteps[2]}>
+                הורד Swagger
+              </button>
+            )}
+            {step === 3 && (
+              <button className="btn" onClick={downloadCode} disabled={!readySteps[3]}>
+                הורד קוד
+              </button>
+            )}
           </div>
 
           <div className="left">
-            {step === 1 && (
-              <button className="btn btn-primary" onClick={generateSwagger} disabled={!!loading}>
-                {loading ? "יוצר Swagger…" : "עבור לשלב הבא (צור Swagger)"}
-              </button>
-            )}
+            {/* בזרימה החדשה אין יותר "עבור לשלב הבא (צור Swagger)" מהכותרת */}
+            {/* יצירת קוד עברה לשלב 3, כולל בחירת שפה */}
 
-            {step === 2 && (
+            {step === 3 && (
               <>
                 <select
                   value={lang}
@@ -156,26 +166,24 @@ export default function AppHeader({
                     background: "#fff",
                     marginInlineEnd: "8px",
                   }}
+                  disabled={!readySteps[3]}
                 >
-                  <option value="node-express">Node + Express</option>
-                  <option value="python-fastapi">Python + FastAPI</option>
-                  <option value="java-spring">Java + Spring</option>
-                  <option value="csharp-aspnet">C# + ASP.NET</option>
-                  <option value="go-chi">Go + Chi</option>
-                  <option value="php-laravel">PHP + Laravel</option>
+                  {/* לפי הבקשה: בחירה בין Node.js ל-.NET */}
+                  <option value="node-express">Node.js</option>
+                  <option value="dotnet-webapi">.NET</option>
                 </select>
 
                 <button
                   className="btn btn-primary"
                   onClick={generateCode}
-                  disabled={!!loading || !String(swaggerText || "").trim()}
+                  disabled={!!loading || !String(swaggerText || "").trim() || !readySteps[3]}
                 >
-                  {loading ? "יוצר קוד…" : "עבור לשלב הבא (צור קוד)"}
+                  {loading ? "יוצר קוד…" : "צור קוד מה-Swagger"}
                 </button>
               </>
             )}
 
-            {step === 3 && <button className="btn" onClick={() => onGotoStep?.(1)}>חזרה לשלב 1</button>}
+           
           </div>
         </div>
       </div>

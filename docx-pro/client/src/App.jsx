@@ -27,6 +27,7 @@ const DOCX_API_URL   = `${API_BASE}/api/generate`;
 const AI_SWAGGER_URL = `${API_BASE}/api/generate-swagger`;
 const AI_CODE_URL    = `${API_BASE}/api/generate-code`;
 const PROJECTS_URL   = `${API_BASE}/api/projects`;
+const PROJECT_SWAGGER_URL = (id) => `${API_BASE}/api/projects/${id}/swagger`;
 
 /** מחליף/מוסיף בלוק מבוא בתוך תוכן העורך */
 function ensureIntroInEditor(currentHtml, introHtml) {
@@ -44,6 +45,12 @@ function ensureIntroInEditor(currentHtml, introHtml) {
     // אין מבוא – מסירים בלוק קיים אם היה
     return body.replace(INTRO_RE, "");
   }
+}
+
+/** שם קובץ בטוח */
+function safeFile(str, suffix) {
+  const base = String(str || "").replace(/[\\/:*?"<>|]+/g, " ").trim() || "document";
+  return `${base} - ${suffix}`;
 }
 
 export default function App(){
@@ -103,6 +110,12 @@ export default function App(){
       const intro = data?.project?.introText || "";
       setSpecHtml(prev => ensureIntroInEditor(prev, intro));
 
+      // מושך Swagger שנבנה מהפרויקט ומציג בשלב 2
+      try {
+        const sw = await fetch(PROJECT_SWAGGER_URL(id));
+        if (sw.ok) setSwaggerText(await sw.text());
+      } catch {}
+
       localStorage.setItem("lastProjectId", data.project.id);
     }catch(e){ console.error(e); }
   }
@@ -119,12 +132,13 @@ export default function App(){
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const blob = await resp.blob();
-      triggerBlobDownload(blob, `${title || "document"}.docx`);
+      const base = currentProject?.name || title || "document";
+      triggerBlobDownload(blob, `${safeFile(base, "Word")}.docx`);
     }catch(e){ alert("שגיאה ביצירת Word: " + e.message); }
     finally{ setLoading(false); }
   };
 
-  /* Step 1 -> 2 */
+  /* Step 1 -> 2 (אופציונלי – משאיר את הכפתור הקיים) */
   const generateSwagger = async () => {
     setLoading(true);
     try{
@@ -145,12 +159,7 @@ info:
   title: ${title || "API"}
   version: 1.0.0
   description: Local mock (server unavailable)
-paths:
-  /health:
-    get:
-      summary: Health check
-      responses:
-        '200': { description: ok }
+paths: {}
 `);
       setStep(2);
     }finally{ setLoading(false); }
@@ -160,8 +169,9 @@ paths:
     if(!swaggerText?.trim()) return alert("אין Swagger להורדה.");
     const isJson = swaggerText.trim().startsWith("{");
     const ext = isJson ? "json" : "yaml";
+    const base = currentProject?.name || title || "swagger";
     const blob = new Blob([swaggerText], { type: "text/plain;charset=utf-8" });
-    triggerBlobDownload(blob, `swagger.${ext}`);
+    triggerBlobDownload(blob, `${safeFile(base, "Swagger")}.${ext}`);
   };
 
   /* Step 2 -> 3 */
@@ -188,8 +198,9 @@ console.log("Generated from swagger locally");`);
 
   const downloadCode = () => {
     if(!codeText?.trim()) return alert("אין קוד להורדה.");
+    const base = currentProject?.name || "generated";
     const blob = new Blob([codeText], { type: "text/plain;charset=utf-8" });
-    triggerBlobDownload(blob, `generated-${lang}.txt`);
+    triggerBlobDownload(blob, `${safeFile(base, lang)}.txt`);
   };
 
   /* Project modal open/save */
@@ -217,6 +228,8 @@ console.log("Generated from swagger locally");`);
         if (data?.project?.name) setTitle(`מסמך אפיון ${data.project.name}`);
         // מעדכנים את בלוק המבוא בתוך המסמך לאחר עריכה
         setSpecHtml(prev => ensureIntroInEditor(prev, data?.project?.introText || ""));
+        // Swagger שנבנה ע״י השרת
+        if (data?.swagger) setSwaggerText(data.swagger);
         localStorage.setItem("lastProjectId", data.project.id);
       } else {
         const resp = await fetch(PROJECTS_URL, {
@@ -230,10 +243,14 @@ console.log("Generated from swagger locally");`);
         if (data?.project?.name) setTitle(`מסמך אפיון ${data.project.name}`);
         // גם בפרויקט חדש – מזריקים מבוא למסמך
         setSpecHtml(prev => ensureIntroInEditor(prev, data?.project?.introText || ""));
+        // Swagger שנבנה ע״י השרת
+        if (data?.swagger) setSwaggerText(data.swagger);
         localStorage.setItem("lastProjectId", data.project.id);
       }
       setShowProjectModal(false);
       fetchProjectsList();
+      // לא מחייב לעבור אוטומטית, אבל אם תרצה:
+      // setStep(2);
     }catch(e){
       alert("שמירת פרויקט נכשלה: " + e.message);
     }
@@ -332,7 +349,7 @@ console.log("Generated from swagger locally");`);
               {step===2 && (
                 <>
                   <div style={{marginBottom:10, color:"var(--muted)"}}>
-                    הקוד של ה-Swagger שהופק מהאיפיון:
+                    הקוד של ה-Swagger שנבנה מפרטי הפרויקט:
                   </div>
                   <textarea
                     className="swagger-area"

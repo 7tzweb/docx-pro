@@ -25,6 +25,7 @@ import "tinymce/skins/content/default/content.min.css";
 export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave }) {
   const [name, setName] = useState("");
   const [managerEmail, setManagerEmail] = useState("");
+  const [swaggerDescription, setSwaggerDescription] = useState(""); // NEW
   const [intro, setIntro] = useState("");
   const [requests, setRequests] = useState([]);
   const [vitality, setVitality] = useState(false);
@@ -36,6 +37,7 @@ export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave
     if (mode === "edit" && initial) {
       setName(initial.name || "");
       setManagerEmail(initial.managerEmail || "");
+      setSwaggerDescription(initial.swaggerDescription || ""); // NEW
       setIntro(initial.introText || "");
       setRequests(
         (initial.requests || []).map((r) => ({
@@ -54,6 +56,7 @@ export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave
     } else {
       setName("");
       setManagerEmail("");
+      setSwaggerDescription(""); // NEW
       setIntro("");
       setRequests([]);
       setVitality(false);
@@ -129,12 +132,13 @@ export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave
   };
 
   const handleSave = () => {
-    if (!name.trim()) {
-      alert("שם פרויקט חובה");
-      return;
-    }
+    if (!name.trim()) return alert("שם פרויקט חובה");
     if (!managerEmail.trim() || !validateEmail(managerEmail)) {
       setEmailError("כתובת אימייל לא תקינה");
+      return;
+    }
+    if (!swaggerDescription.trim()) {
+      alert("יש למלא תיאור ל-Swagger (info.description)");
       return;
     }
     setEmailError("");
@@ -142,6 +146,7 @@ export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave
     onSave({
       name: name.trim(),
       managerEmail: managerEmail.trim(),
+      swaggerDescription: swaggerDescription.trim(), // NEW
       introText: intro,
       requests,
       extra: { vitality, ping },
@@ -155,9 +160,7 @@ export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave
       <div style={styles.modal}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <h2 style={{ margin: 0 }}>{mode === "edit" ? "עריכת פרויקט" : "פרויקט חדש"}</h2>
-          <button className="btn" onClick={onClose}>
-            סגור
-          </button>
+          <button className="btn" onClick={onClose}>סגור</button>
         </div>
 
         {/* שתי עמודות: שם הפרויקט + מייל מנהל */}
@@ -176,21 +179,25 @@ export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave
           <div>
             <label style={styles.label}>מייל מנהל הפרויקט</label>
             <input
-              style={{
-                ...styles.input,
-                borderColor: emailError ? "#dc2626" : "var(--border)",
-                outlineColor: emailError ? "#dc2626" : undefined,
-              }}
+              style={{ ...styles.input, borderColor: emailError ? "#dc2626" : "var(--border)", outlineColor: emailError ? "#dc2626" : undefined }}
               type="email"
               placeholder="name@company.com"
               value={managerEmail}
-              onChange={(e) => {
-                setManagerEmail(e.target.value);
-                if (emailError) setEmailError("");
-              }}
+              onChange={(e) => { setManagerEmail(e.target.value); if (emailError) setEmailError(""); }}
             />
             {!!emailError && <div style={{ color: "#dc2626", fontSize: 12, marginTop: 4 }}>{emailError}</div>}
           </div>
+        </div>
+
+        {/* תיאור ל-Swagger (חובה) */}
+        <div style={{ marginTop: 12 }}>
+          <label style={styles.label}>תיאור ל-Swagger (info.description)</label>
+          <textarea
+            style={{ ...styles.input, minHeight: 84, resize: "vertical" }}
+            value={swaggerDescription}
+            onChange={(e)=>setSwaggerDescription(e.target.value)}
+            placeholder="תיאור קצר שיופיע בסעיף info.description של ה-Swagger"
+          />
         </div>
 
         {/* פתיח (details) ברירת מחדל סגור */}
@@ -214,9 +221,7 @@ export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave
           />
         ))}
 
-        <button className="btn" onClick={addRequest}>
-          הוסף בקשה
-        </button>
+        <button className="btn" onClick={addRequest}>הוסף בקשה</button>
 
         <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 10 }}>
           <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -230,50 +235,19 @@ export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave
         </div>
 
         <div style={{ display: "flex", gap: 10, justifyContent: "end", marginTop: 16 }}>
-          <button className="btn" onClick={onClose}>
-            ביטול
-          </button>
-          <button className="btn btn-primary" onClick={handleSave}>
-            {mode === "edit" ? "עדכן" : "שמירה"}
-          </button>
+          <button className="btn" onClick={onClose}>ביטול</button>
+          <button className="btn btn-primary" onClick={handleSave}>{mode === "edit" ? "עדכן" : "שמירה"}</button>
         </div>
       </div>
     </div>
   );
 }
 
-function randId() {
-  return Math.random().toString(36).slice(2, 10);
-}
+function randId() { return Math.random().toString(36).slice(2, 10); }
 
 const styles = {
-  overlay: {
-    position: "fixed",
-    inset: 0,
-    background: "rgba(2,6,23,.55)",
-    backdropFilter: "blur(4px)",
-    zIndex: 1000,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "24px",
-  },
-  modal: {
-    width: "min(1100px, 98vw)",
-    maxHeight: "90vh",
-    overflow: "auto",
-    background: "#fff",
-    border: "1px solid var(--border)",
-    borderRadius: "18px",
-    boxShadow: "0 30px 80px rgba(2,6,23,.18)",
-    padding: "16px 16px 22px",
-  },
-  label: { fontWeight: 600, marginBottom: 6, display: "block" },
-  input: {
-    width: "100%",
-    padding: "10px 12px",
-    border: "1px solid var(--border)",
-    borderRadius: "12px",
-    background: "#fff",
-  },
+  overlay: { position: "fixed", inset: 0, background: "rgba(2,6,23,.55)", backdropFilter: "blur(4px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" },
+  modal:   { width: "min(1100px, 98vw)", maxHeight: "90vh", overflow: "auto", background: "#fff", border: "1px solid var(--border)", borderRadius: "18px", boxShadow: "0 30px 80px rgba(2,6,23,.18)", padding: "16px 16px 22px" },
+  label:   { fontWeight: 600, marginBottom: 6, display: "block" },
+  input:   { width: "100%", padding: "10px 12px", border: "1px solid var(--border)", borderRadius: "12px", background: "#fff" },
 };

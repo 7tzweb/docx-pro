@@ -2,14 +2,14 @@
   "projects": [
     {
       "id": "KD7vmICOFrEm",
-      "name": "שליפת תשובת",
+      "name": "AccessEntitlement_AioSubscriberAccountsg",
       "introText": "<p class=\"p1\"><span class=\"Apple-converted-space\">     </span></p>\n<p class=\"p1\"> </p>\n<p class=\"p2\"><strong>רמי לוי | מנהל מסחרי, ניהול תפעול ומכירות</strong></p>\n<p class=\"p3\"> </p>\n<p class=\"p3\">054-5555555</p>\n<p class=\"p2\">חיפה</p>\n<p class=\"p4\"><span class=\"s1\"><a href=\"mailto:mail@mail.com\">mail@mail.com</a></span></p>\n<p class=\"p4\"><span class=\"s1\"><a href=\"http://www.linkedin.com/in/mylinkedin\">www.linkedin.com/in/mylinkedin</a></span></p>\n<p class=\"p3\"> </p>\n<p class=\"p3\"> </p>\n<ul class=\"ul1\">\n<li class=\"li2\">מנהל תפעול ומכירות מנוסה<span class=\"s3\">, </span>ניהול מערכות ארגוניות מורכבות בענף המזון<span class=\"s3\">, </span>תקשורת ונדל<span class=\"s3\">\"</span>ן</li>\n<li class=\"li2\">ניהול חוזים והתקשרויות<span class=\"s3\">, </span>ניהול גופי שירות והובלת צוותי מכירה לעמידה ביעדים<span class=\"s3\">, </span>תוך ראייה עסקית רחבה</li>\n<li class=\"li2\">היכרות מעמיקה עם תחומי המכירות<span class=\"s3\">, </span>התפעול וההפצה<span class=\"s3\">, </span>הגדלת נתח שוק ושימור לקוחות קיימים</li>\n<li class=\"li2\">ניהול תקציב וגיבוש תכניות עבודה <span class=\"s3\">,</span>הובלת צוותי העבודה לעמידה ביעדים מאתגרים<span class=\"s3\">. </span>ייזום תהליכים<span class=\"s3\">, </span>הובלת שינויים ארגוניים ובניית צוותים מקצועיים מגובשים בעלי מחויבות גבוהה</li>\n</ul>\n<p class=\"p3\"> </p>\n<p class=\"p2\"><strong>ניסיון מקצועי </strong></p>\n<p class=\"p3\"> </p>\n<p class=\"p2\"><strong>1998-2017 | מנהל אתרים ונכסים, חברת הטלפון, אזור ירושלים והסביבה</strong></p>\n<ul class=\"ul1\">\n<li class=\"li2\">הקמה והרחבת מתמדת של כמות ופריסת האתרים הסלולאריים של החברה באזור</li>\n<li class=\"li2\">איתור נכסים מתאימים להצבת אנטנות וחתימת חוזים עם בעלי נכסים</li>\n<li class=\"li2\">ראייה כוללת בתחומי מכירות ותפעול שוטף של אתרי הסלולר</li>\n<li class=\"li2\">ניהול צוות מקצועי מתחום הנדל<span class=\"s3\">\"</span>ן לאיתור אתרים והערכת כדאיותם</li>\n<li class=\"li2\">עבודה שוטפת בתחום רישוי אתרים <span class=\"s3\">– </span>עירייה ומשרדי ממשלה</li>\n<li class=\"li2\">עבודה שוטפת מול קבלני משנה בתחום תכנון וביצוע</li>\n</ul>",
       "requests": [
         {
           "id": "moaik7ng",
           "url": "test",
           "method": "GET",
-          "headers": "dkjfkld\ndjkfhadjf",
+          "headers": "",
           "request": "dfdfdafddf",
           "response": "dfdfdf",
           "stdHeaders": [
@@ -29,8 +29,9 @@
         "ping": true
       },
       "createdAt": "2025-09-14T11:30:39.521Z",
-      "updatedAt": "2025-09-15T09:50:47.856Z",
-      "managerEmail": "tsohar.zigdon@bankleumi.co.il"
+      "updatedAt": "2025-09-16T09:20:23.788Z",
+      "managerEmail": "tsohar.zigdon@bankleumi.co.il",
+      "swaggerDescription": "The service gets the folllowing parameters from the login digital process \n    \n        - subscriptionNumber - the user subscribtion number\n\n      and returns \n    \n        subscription Number and relevant data \n      \n          List of customers of the subscription \n      \n            List of related user accounts(JONI) from ODS. \n            \n          List of Profiles\n    \n    Incase the approaching system is Business application or web The service will access the joni business tables, otherwise The service will access the joni private tables\n    Data is retrieved from `##ODS##"
     }
   ]
 }

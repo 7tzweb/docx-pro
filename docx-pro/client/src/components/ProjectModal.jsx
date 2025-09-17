@@ -1,253 +1,167 @@
 import React, { useEffect, useMemo, useState } from "react";
+import RichTextEditor from "./RichTextEditor";
 import RequestEditor from "./RequestEditor";
-import { Editor } from "@tinymce/tinymce-react";
 
-/* TinyMCE resources */
-import "tinymce/tinymce";
-import "tinymce/icons/default";
-import "tinymce/themes/silver";
-import "tinymce/models/dom";
-import "tinymce/plugins/advlist";
-import "tinymce/plugins/autolink";
-import "tinymce/plugins/code";
-import "tinymce/plugins/directionality";
-import "tinymce/plugins/link";
-import "tinymce/plugins/lists";
-import "tinymce/plugins/table";
-import "tinymce/plugins/wordcount";
-import "tinymce/plugins/image";
-import "tinymce/plugins/visualblocks";
-import "tinymce/plugins/visualchars";
-import "tinymce/skins/ui/oxide/skin.min.css";
-import "tinymce/skins/ui/oxide/content.min.css";
-import "tinymce/skins/content/default/content.min.css";
+/**
+ * ProjectModal – יצירה/עריכת פרויקט מלא.
+ */
+export default function ProjectModal({ open, mode = "create", initial, rtl = true, onClose, onSave }) {
+  const isEdit = mode === "edit";
 
-export default function ProjectModal({ open, mode, initial, rtl, onClose, onSave }) {
   const [name, setName] = useState("");
   const [managerEmail, setManagerEmail] = useState("");
-  const [swaggerDescription, setSwaggerDescription] = useState(""); // NEW
-  const [intro, setIntro] = useState("");
+  const [jiraTicket, setJiraTicket] = useState("");          // ← חדש
+  const [introText, setIntroText] = useState("");
   const [requests, setRequests] = useState([]);
-  const [vitality, setVitality] = useState(false);
-  const [ping, setPing] = useState(false);
-  const [emailError, setEmailError] = useState("");
+  const [extra, setExtra] = useState({ vitality: false, ping: false });
 
   useEffect(() => {
     if (!open) return;
-    if (mode === "edit" && initial) {
+    if (isEdit && initial) {
       setName(initial.name || "");
       setManagerEmail(initial.managerEmail || "");
-      setSwaggerDescription(initial.swaggerDescription || ""); // NEW
-      setIntro(initial.introText || "");
-      setRequests(
-        (initial.requests || []).map((r) => ({
-          id: r.id || randId(),
-          url: r.url || "",
-          method: r.method || "GET",
-          headers: r.headers || "",
-          request: r.request || "",
-          response: r.response || "",
-          stdHeaders: Array.isArray(r.stdHeaders) ? r.stdHeaders : [],
-        }))
-      );
-      setVitality(!!initial?.extra?.vitality);
-      setPing(!!initial?.extra?.ping);
-      setEmailError("");
+      setJiraTicket(initial.jiraTicket || "");               // ← חדש
+      setIntroText(initial.introText || "");
+      setRequests(Array.isArray(initial.requests) ? [...initial.requests] : []);
+      setExtra({ vitality: !!initial?.extra?.vitality, ping: !!initial?.extra?.ping });
     } else {
       setName("");
       setManagerEmail("");
-      setSwaggerDescription(""); // NEW
-      setIntro("");
-      setRequests([]);
-      setVitality(false);
-      setPing(false);
-      setEmailError("");
+      setJiraTicket("");                                     // ← חדש
+      setIntroText("");
+      setRequests([{
+        id: cryptoRandomId(), url: "", method: "GET", stdHeaders: [],
+        headers: "", request: "", response: "", summary: "", description: "", operationId: "",
+      }]);
+      setExtra({ vitality: false, ping: false });
     }
-  }, [open, mode, initial]);
+  }, [open, isEdit, initial]);
 
-  const tinymceInit = useMemo(
-    () => ({
-      license_key: "gpl",
-      promotion: false,
-      menubar: false,
-      branding: false,
-      rtl_ui: true,
-      directionality: rtl ? "rtl" : "ltr",
-      height: 360,
-      toolbar_mode: "wrap",
-      toolbar_sticky: true,
-      skin: false,
-      content_css: false,
-      entity_encoding: "raw",
-      convert_urls: false,
-      forced_root_block: "p",
-      plugins: [
-        "advlist",
-        "autolink",
-        "lists",
-        "link",
-        "table",
-        "code",
-        "directionality",
-        "wordcount",
-        "image",
-        "visualblocks",
-        "visualchars",
-      ],
-      toolbar:
-        "undo redo | blocks | bold italic underline strikethrough | " +
-        "forecolor backcolor | alignleft aligncenter alignright alignjustify | " +
-        "bullist numlist outdent indent | table | ltr rtl | link image | visualblocks code",
-      block_formats: "כותרת 1=h1; כותרת 2=h2; כותרת 3=h3; פסקה=p",
-      content_style: `
-        body { font-family: Inter, system-ui, -apple-system, "Segoe UI", Arial, Helvetica, sans-serif;
-               font-size: 16px; line-height: 1.85;
-               direction: ${rtl ? "rtl" : "ltr"}; text-align: ${rtl ? "right" : "left"}; }
-        table { border-collapse: collapse; width: 100%; }
-        table, th, td { border: 1px solid #e6e8ee; }
-        th, td { padding: 8px; }
-      `,
-    }),
-    [rtl]
-  );
+  const validEmail = useMemo(() => /^\S+@\S+\.\S+$/.test(managerEmail), [managerEmail]);
+  const canSave = name.trim().length > 0 && validEmail;
 
-  const addRequest = () =>
-    setRequests((prev) => [
-      ...prev,
-      { id: randId(), url: "", method: "GET", headers: "", request: "", response: "", stdHeaders: [] },
-    ]);
-
-  const updateRequest = (rid, patch) => setRequests((prev) => prev.map((r) => (r.id === rid ? { ...r, ...patch } : r)));
-  const cloneRequest = (rid) =>
+  function updateRequest(idx, patch) {
     setRequests((prev) => {
-      const r = prev.find((x) => x.id === rid);
-      if (!r) return prev;
-      return [...prev, { ...r, id: randId() }];
+      const next = [...prev];
+      next[idx] = { ...next[idx], ...patch };
+      return next;
     });
-  const deleteRequest = (rid) => setRequests((prev) => prev.filter((r) => r.id !== rid));
+  }
+  function cloneRequest(idx) {
+    setRequests((prev) => {
+      const c = prev[idx] || {};
+      const copy = { ...c, id: cryptoRandomId() };
+      const next = [...prev];
+      next.splice(idx + 1, 0, copy);
+      return next;
+    });
+  }
+  function deleteRequest(idx) { setRequests((prev) => prev.filter((_, i) => i !== idx)); }
+  function addRequest() {
+    setRequests((prev) => [...prev, {
+      id: cryptoRandomId(), url: "", method: "GET", stdHeaders: [],
+      headers: "", request: "", response: "", summary: "", description: "", operationId: "",
+    }]);
+  }
 
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // בסיסי, טוב לרוב המקרים
-    return re.test(String(email).toLowerCase());
-  };
-
-  const handleSave = () => {
-    if (!name.trim()) return alert("שם פרויקט חובה");
-    if (!managerEmail.trim() || !validateEmail(managerEmail)) {
-      setEmailError("כתובת אימייל לא תקינה");
-      return;
-    }
-    if (!swaggerDescription.trim()) {
-      alert("יש למלא תיאור ל-Swagger (info.description)");
-      return;
-    }
-    setEmailError("");
-
-    onSave({
+  async function handleSave() {
+    if (!canSave) return;
+    const payload = {
       name: name.trim(),
       managerEmail: managerEmail.trim(),
-      swaggerDescription: swaggerDescription.trim(), // NEW
-      introText: intro,
+      jiraTicket: (jiraTicket || "").trim(),                 // ← נשלח לשרת
+      introText: introText || "",
       requests,
-      extra: { vitality, ping },
-    });
-  };
+      extra: { ...extra },
+    };
+    await onSave?.(payload);
+  }
 
   if (!open) return null;
 
   return (
-    <div style={styles.overlay}>
-      <div style={styles.modal}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <h2 style={{ margin: 0 }}>{mode === "edit" ? "עריכת פרויקט" : "פרויקט חדש"}</h2>
+    <div style={backdropStyle} onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
+      <div style={{ ...modalStyle, direction: rtl ? "rtl" : "ltr", textAlign: rtl ? "right" : "left" }}>
+        <div style={headerStyle}>
+          <div style={{ fontWeight: 700, fontSize: 18 }}>{isEdit ? "עריכת פרויקט" : "פרויקט חדש"}</div>
           <button className="btn" onClick={onClose}>סגור</button>
         </div>
 
-        {/* שתי עמודות: שם הפרויקט + מייל מנהל */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        {/* שם + מייל + Jira */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
           <div>
-            <label style={styles.label}>שם הפרויקט</label>
-            <input
-              style={styles.input}
-              type="text"
-              placeholder="לדוגמה: שליפת תשובות"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
+            <div style={labelStyle}>שם הפרויקט</div>
+            <input style={inputStyle} value={name} onChange={(e) => setName(e.target.value)} placeholder="MyService" />
           </div>
-
           <div>
-            <label style={styles.label}>מייל מנהל הפרויקט</label>
+            <div style={labelStyle}>מייל מנהל הפרויקט</div>
             <input
-              style={{ ...styles.input, borderColor: emailError ? "#dc2626" : "var(--border)", outlineColor: emailError ? "#dc2626" : undefined }}
-              type="email"
-              placeholder="name@company.com"
+              style={{ ...inputStyle, borderColor: managerEmail && !validEmail ? "#ff6b6b" : "var(--border)" }}
               value={managerEmail}
-              onChange={(e) => { setManagerEmail(e.target.value); if (emailError) setEmailError(""); }}
+              onChange={(e) => setManagerEmail(e.target.value)}
+              placeholder="name@company.com"
             />
-            {!!emailError && <div style={{ color: "#dc2626", fontSize: 12, marginTop: 4 }}>{emailError}</div>}
+            {!validEmail && managerEmail ? (
+              <div style={{ color: "#ff6b6b", fontSize: 12, marginTop: 4 }}>מייל לא תקין</div>
+            ) : null}
+          </div>
+          <div>
+            <div style={labelStyle}>Jira Ticket</div>
+            <input style={inputStyle} value={jiraTicket} onChange={(e) => setJiraTicket(e.target.value)} placeholder="APIA-1234" />
           </div>
         </div>
 
-        {/* תיאור ל-Swagger (חובה) */}
-        <div style={{ marginTop: 12 }}>
-          <label style={styles.label}>תיאור ל-Swagger (info.description)</label>
-          <textarea
-            style={{ ...styles.input, minHeight: 84, resize: "vertical" }}
-            value={swaggerDescription}
-            onChange={(e)=>setSwaggerDescription(e.target.value)}
-            placeholder="תיאור קצר שיופיע בסעיף info.description של ה-Swagger"
-          />
-        </div>
-
-        {/* פתיח (details) ברירת מחדל סגור */}
-        <details style={{ margin: "14px 0" }}>
-          <summary style={{ cursor: "pointer", color: "var(--muted)" }}>טקסט מבוא למסמך (אופציונלי)</summary>
-          <div style={{ marginTop: 10 }}>
-            <Editor value={intro} onEditorChange={setIntro} init={tinymceInit} />
-          </div>
+        {/* טקסט מבוא למסמך */}
+        <details open={false} style={{ marginBottom: 12 }}>
+          <summary style={{ cursor: "pointer", color: "var(--muted)", marginBottom: 8 }}>טקסט מבוא למסמך (אופציונלי)</summary>
+          <RichTextEditor value={introText} onChange={setIntroText} rtl={rtl} height={320} />
         </details>
 
-        <div style={{ marginTop: 10, marginBottom: 8, fontWeight: 600 }}>בקשות API</div>
+        {/* רשימת בקשות */}
+        <div style={{ fontSize: 14, fontWeight: 600, margin: "6px 0" }}>בקשות API</div>
         {requests.map((r, idx) => (
           <RequestEditor
-            key={r.id}
+            key={r.id || idx}
             r={r}
             idx={idx}
             rtl={rtl}
-            onChange={(patch) => updateRequest(r.id, patch)}
-            onClone={() => cloneRequest(r.id)}
-            onDelete={() => deleteRequest(r.id)}
+            onChange={(patch) => updateRequest(idx, patch)}
+            onClone={() => cloneRequest(idx)}
+            onDelete={() => deleteRequest(idx)}
           />
         ))}
-
-        <button className="btn" onClick={addRequest}>הוסף בקשה</button>
-
-        <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 10 }}>
-          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <input type="checkbox" checked={vitality} onChange={(e) => setVitality(e.target.checked)} />
-            vitality
-          </label>
-          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <input type="checkbox" checked={ping} onChange={(e) => setPing(e.target.checked)} />
-            ping
-          </label>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "6px 0 12px" }}>
+          <button className="btn" onClick={addRequest}>הוסף בקשה</button>
+          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <input type="checkbox" checked={!!extra?.ping} onChange={(e) => setExtra((x) => ({ ...x, ping: e.target.checked }))} />
+              ping
+            </label>
+            <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <input type="checkbox" checked={!!extra?.vitality} onChange={(e) => setExtra((x) => ({ ...x, vitality: e.target.checked }))} />
+              vitality
+            </label>
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: 10, justifyContent: "end", marginTop: 16 }}>
+        {/* כפתורי פעולה */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
           <button className="btn" onClick={onClose}>ביטול</button>
-          <button className="btn btn-primary" onClick={handleSave}>{mode === "edit" ? "עדכן" : "שמירה"}</button>
+          <button className="btn primary" disabled={!canSave} onClick={handleSave}>{isEdit ? "עדכן" : "צור"}</button>
         </div>
       </div>
     </div>
   );
 }
 
-function randId() { return Math.random().toString(36).slice(2, 10); }
+/* === styles === */
+const backdropStyle = { position: "fixed", inset: 0, background: "rgba(20,22,38,0.42)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 };
+const modalStyle = { width: "min(1020px, 96vw)", maxHeight: "90vh", overflow: "auto", background: "#fff", borderRadius: 16, border: "1px solid var(--border)", padding: 16, boxShadow: "0 20px 70px rgba(0,0,0,0.25)" };
+const headerStyle = { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 };
+const labelStyle = { fontSize: 13, color: "var(--muted)", marginBottom: 4 };
+const inputStyle = { width: "100%", padding: "10px 12px", border: "1px solid var(--border)", borderRadius: 12, background: "#fff" };
 
-const styles = {
-  overlay: { position: "fixed", inset: 0, background: "rgba(2,6,23,.55)", backdropFilter: "blur(4px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" },
-  modal:   { width: "min(1100px, 98vw)", maxHeight: "90vh", overflow: "auto", background: "#fff", border: "1px solid var(--border)", borderRadius: "18px", boxShadow: "0 30px 80px rgba(2,6,23,.18)", padding: "16px 16px 22px" },
-  label:   { fontWeight: 600, marginBottom: 6, display: "block" },
-  input:   { width: "100%", padding: "10px 12px", border: "1px solid var(--border)", borderRadius: "12px", background: "#fff" },
-};
+function cryptoRandomId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
+  return "id-" + Math.random().toString(36).slice(2, 10);
+}

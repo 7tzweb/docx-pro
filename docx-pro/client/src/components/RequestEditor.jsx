@@ -4,7 +4,7 @@ import { HEADER_CANDIDATES } from "../constants";
 /**
  * עורך של בקשה אחת במודאל הפרויקט.
  * props:
- *  - r: אובייקט בקשה { id, url, method, headers, request, response, stdHeaders? }
+ *  - r: אובייקט בקשה { id, url, method, headers, request, response, stdHeaders?, summary?, description?, operationId? }
  *  - idx: אינדקס (לתצוגה)
  *  - rtl: האם RTL
  *  - onChange(patch)
@@ -38,6 +38,7 @@ export default function RequestEditor({ r, idx, rtl, onChange, onClone, onDelete
 
   return (
     <div style={styles.card}>
+      {/* שורה 1: URL + Method + פעולות */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 180px auto", gap: 8 }}>
         <div>
           <label style={styles.sublabel}>URL</label>
@@ -69,6 +70,37 @@ export default function RequestEditor({ r, idx, rtl, onChange, onClone, onDelete
           <button className="btn" onClick={onDelete}>
             מחק
           </button>
+        </div>
+      </div>
+
+      {/* שורה 2: summary + description + operationId (חדש) */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 220px", gap: 8, marginTop: 8 }}>
+        <div>
+          <label style={styles.sublabel}>summary</label>
+          <input
+            style={styles.input}
+            placeholder="תקציר קצר לפעולה (מופיע ב-Swagger)"
+            value={r.summary || ""}
+            onChange={(e) => onChange({ summary: e.target.value })}
+          />
+        </div>
+        <div>
+          <label style={styles.sublabel}>description</label>
+          <input
+            style={styles.input}
+            placeholder="תיאור מפורט יותר לפעולה"
+            value={r.description || ""}
+            onChange={(e) => onChange({ description: e.target.value })}
+          />
+        </div>
+        <div>
+          <label style={styles.sublabel}>operationId</label>
+          <input
+            style={styles.input}
+            placeholder="getItems / createOrder וכו׳"
+            value={r.operationId || ""}
+            onChange={(e) => onChange({ operationId: e.target.value })}
+          />
         </div>
       </div>
 

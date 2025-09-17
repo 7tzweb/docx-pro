@@ -1,5 +1,6 @@
 // רשימת כותרות סטנדרטיות שניתן להוסיף לכל בקשה
 export const HEADER_CANDIDATES = [
+  "originalUserId",
   "x-transaction-id",
   "x-message-id",
   "x-trace-id",

@@ -3,11 +3,11 @@
     {
       "id": "KD7vmICOFrEm",
       "name": "AccessEntitlement_AioSubscriberAccountsg",
-      "introText": "<p class=\"p1\"><span class=\"Apple-converted-space\">     </span></p>\n<p class=\"p1\"> </p>\n<p class=\"p2\"><strong>רמי לוי | מנהל מסחרי, ניהול תפעול ומכירות</strong></p>\n<p class=\"p3\"> </p>\n<p class=\"p3\">054-5555555</p>\n<p class=\"p2\">חיפה</p>\n<p class=\"p4\"><span class=\"s1\"><a href=\"mailto:mail@mail.com\">mail@mail.com</a></span></p>\n<p class=\"p4\"><span class=\"s1\"><a href=\"http://www.linkedin.com/in/mylinkedin\">www.linkedin.com/in/mylinkedin</a></span></p>\n<p class=\"p3\"> </p>\n<p class=\"p3\"> </p>\n<ul class=\"ul1\">\n<li class=\"li2\">מנהל תפעול ומכירות מנוסה<span class=\"s3\">, </span>ניהול מערכות ארגוניות מורכבות בענף המזון<span class=\"s3\">, </span>תקשורת ונדל<span class=\"s3\">\"</span>ן</li>\n<li class=\"li2\">ניהול חוזים והתקשרויות<span class=\"s3\">, </span>ניהול גופי שירות והובלת צוותי מכירה לעמידה ביעדים<span class=\"s3\">, </span>תוך ראייה עסקית רחבה</li>\n<li class=\"li2\">היכרות מעמיקה עם תחומי המכירות<span class=\"s3\">, </span>התפעול וההפצה<span class=\"s3\">, </span>הגדלת נתח שוק ושימור לקוחות קיימים</li>\n<li class=\"li2\">ניהול תקציב וגיבוש תכניות עבודה <span class=\"s3\">,</span>הובלת צוותי העבודה לעמידה ביעדים מאתגרים<span class=\"s3\">. </span>ייזום תהליכים<span class=\"s3\">, </span>הובלת שינויים ארגוניים ובניית צוותים מקצועיים מגובשים בעלי מחויבות גבוהה</li>\n</ul>\n<p class=\"p3\"> </p>\n<p class=\"p2\"><strong>ניסיון מקצועי </strong></p>\n<p class=\"p3\"> </p>\n<p class=\"p2\"><strong>1998-2017 | מנהל אתרים ונכסים, חברת הטלפון, אזור ירושלים והסביבה</strong></p>\n<ul class=\"ul1\">\n<li class=\"li2\">הקמה והרחבת מתמדת של כמות ופריסת האתרים הסלולאריים של החברה באזור</li>\n<li class=\"li2\">איתור נכסים מתאימים להצבת אנטנות וחתימת חוזים עם בעלי נכסים</li>\n<li class=\"li2\">ראייה כוללת בתחומי מכירות ותפעול שוטף של אתרי הסלולר</li>\n<li class=\"li2\">ניהול צוות מקצועי מתחום הנדל<span class=\"s3\">\"</span>ן לאיתור אתרים והערכת כדאיותם</li>\n<li class=\"li2\">עבודה שוטפת בתחום רישוי אתרים <span class=\"s3\">– </span>עירייה ומשרדי ממשלה</li>\n<li class=\"li2\">עבודה שוטפת מול קבלני משנה בתחום תכנון וביצוע</li>\n</ul>",
+      "introText": "<p class=\"p1\"><strong> </strong></p>\n<h1 dir=\"rtl\">MicroService spec</h1>\n<h2 dir=\"rtl\">חוקים גנריים לפקדונות DIY</h2>\n<p dir=\"rtl\">תוכן עניינים</p>\n<p dir=\"rtl\">1.                                מטרת השירות. 3</p>\n<p dir=\"rtl\">2.                               הרשאות גישה (jwt  / תעודות וכו' ) 3</p>\n<p dir=\"rtl\">3.                                תהליכים, Endpoints. 4</p>\n<p dir=\"rtl\">4.                               GET/ deposit-diy-rulesets-ms /Deposit/EngineRuleset/{model}  4</p>\n<p dir=\"rtl\">5.                                diagram.. 7</p>\n<p dir=\"rtl\">6.                                הודעות שגיאה. 8</p>\n<p dir=\"rtl\">7.                                מקורות המידע. 9</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<p class=\"p1\"><strong> </strong></p>\n<p dir=\"ltr\"> </p>\n<p dir=\"rtl\">ניהול שינויים</p>\n<div dir=\"rtl\" align=\"left\">\n<table><colgroup><col width=\"65\"><col width=\"81\"><col width=\"91\"><col width=\"285\"><col width=\"80\"></colgroup>\n<tbody>\n<tr>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מהדורה</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">תאריך</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מבצע השינוי</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">תמצית השינוי</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מזהה תכולת מערכת</p>\n</td>\n</tr>\n<tr>\n<td dir=\"ltr\">\n<p dir=\"rtl\">1</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">28/02/2024</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">ליאב</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מהדורה ראשונה</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\"> </p>\n</td>\n</tr>\n</tbody>\n</table>\n</div>\n<p dir=\"rtl\"> </p>\n<p class=\"p1\"><strong> </strong></p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<h1 dir=\"rtl\">1.   מטרת השירות</h1>\n<p dir=\"rtl\">לנהל חוקים גנריים עבור פקדונות DIY.</p>\n<p dir=\"rtl\">באמצעות שירות זה ניתן יהיה לקבל חוק גנרי. </p>\n<p dir=\"rtl\"> </p>\n<h1 dir=\"rtl\">2.   הרשאות גישה (jwt  / תעודות וכו' )</h1>\n<p class=\"p1\"><strong> </strong></p>\n<p dir=\"ltr\"> </p>\n<p dir=\"rtl\"> </p>\n<h1 dir=\"rtl\">3.   תהליכים, Endpoints</h1>\n<p dir=\"rtl\">                    </p>\n<p dir=\"rtl\">ניתן להפעיל שירות זה על ידי העברת מספר דגם (model Number) שיועבר כפרמטר. אם מעוניינים לקבל את כל סט החוקים עבור הדגם, אין להעביר ב-queryString פרמטר נוסף. אם מעוניינים לקבל חוק ספציפי עבור הדגם, יש להעביר ב-query string את החוק (ruleNumber), בנוסף למספר הדגם שיועבר כפרמטר.</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\">יש לפנות למונגו ל-DB בשם diy_customer_deposit לקולקשן בשם 'rulesets' ומשם לבצע שליפה לפי הפילטור הבא:</p>\n<p dir=\"rtl\">פילטור לפי דגם:</p>\n<p dir=\"rtl\">{modelNumber: \" model-number '}</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\">פילטור לפי דגם וחוק:</p>\n<p dir=\"rtl\">{modelNumber: \" model-number '}</p>\n<p dir=\"rtl\">ולאחר השליפה נבצע פילטור ע\"פ מספר חוק.</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\">ה-DB של המונגו נמצא בשרתים הבאים לפי סביבה:</p>\n<p class=\"p1\"> </p>",
       "requests": [
         {
           "id": "moaik7ng",
-          "url": "test",
+          "url": "/AccessEntitlement/user-profile/user/{originalUserId}",
           "method": "GET",
           "headers": "",
           "request": "dfdfdafddf",
@@ -20,8 +20,12 @@
             "x-user-id",
             "x-app-id",
             "x-uuid-id",
-            "x-ip-id"
-          ]
+            "x-ip-id",
+            "originalUserId"
+          ],
+          "summary": "Receive accounts info and list of relevant profiles.",
+          "description": "receive accounts and customers data by subscription number.",
+          "operationId": "accountsInfo"
         }
       ],
       "extra": {
@@ -29,9 +33,10 @@
         "ping": true
       },
       "createdAt": "2025-09-14T11:30:39.521Z",
-      "updatedAt": "2025-09-16T09:20:23.788Z",
+      "updatedAt": "2025-09-17T07:54:04.156Z",
       "managerEmail": "tsohar.zigdon@bankleumi.co.il",
-      "swaggerDescription": "The service gets the folllowing parameters from the login digital process \n    \n        - subscriptionNumber - the user subscribtion number\n\n      and returns \n    \n        subscription Number and relevant data \n      \n          List of customers of the subscription \n      \n            List of related user accounts(JONI) from ODS. \n            \n          List of Profiles\n    \n    Incase the approaching system is Business application or web The service will access the joni business tables, otherwise The service will access the joni private tables\n    Data is retrieved from `##ODS##"
+      "swaggerDescription": "The service gets the folllowing parameters from the login digital process \n    \n        - subscriptionNumber - the user subscribtion number\n\n      and returns \n    \n        subscription Number and relevant data \n      \n          List of customers of the subscription \n      \n            List of related user accounts(JONI) from ODS. \n            \n          List of Profiles\n    \n    Incase the approaching system is Business application or web The service will access the joni business tables, otherwise The service will access the joni private tables\n    Data is retrieved from `##ODS##",
+      "jiraTicket": "APIA-8584"
     }
   ]
 }

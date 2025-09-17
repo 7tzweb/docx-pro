@@ -13,7 +13,7 @@ import { nanoid } from "nanoid";
 /* מודולים מפוצלים */
 import { buildSwaggerFromProject } from "./buildSwagger.mjs";
 import { generateDocxBuffer } from "./generateDocx.mjs";
-import { generateCodeFromSwagger } from "./generateCode.mjs";
+import { generateCodeFromProject } from "./generateCode.mjs";   // ← שינוי שם הייבוא
 
 /* ====== INIT APP ====== */
 const app = express();
@@ -47,7 +47,7 @@ app.get("/api/projects/:id", async (req, res) => {
 });
 
 app.post("/api/projects", async (req, res) => {
-  const { name, introText = "", requests = [], extra = {}, managerEmail = "", swaggerDescription = "" } = req.body || {};
+  const { name, introText = "", requests = [], extra = {}, managerEmail = "", swaggerDescription = "", jiraTicket = "" } = req.body || {};
   if (!name || !String(name).trim()) return res.status(400).json({ message: "name is required" });
 
   await db.read();
@@ -60,13 +60,14 @@ app.post("/api/projects", async (req, res) => {
     extra,
     managerEmail,
     swaggerDescription,
+    jiraTicket: String(jiraTicket || "").trim(),
     createdAt: now,
     updatedAt: now
   };
   db.data.projects.push(project);
   await db.write();
 
-  const swagger = buildSwaggerFromProject(project);
+  const swagger = buildSwaggerFromProject(project); // נשאר
   res.json({ project, swagger });
 });
 
@@ -76,7 +77,7 @@ app.put("/api/projects/:id", async (req, res) => {
   const idx = db.data.projects.findIndex(p => p.id === id);
   if (idx === -1) return res.status(404).json({ message: "Not found" });
 
-  const { name, introText, requests, extra, managerEmail, swaggerDescription } = req.body || {};
+  const { name, introText, requests, extra, managerEmail, swaggerDescription, jiraTicket } = req.body || {};
   const curr = db.data.projects[idx];
   const updated = {
     ...curr,
@@ -86,16 +87,17 @@ app.put("/api/projects/:id", async (req, res) => {
     ...(extra !== undefined ? { extra } : {}),
     ...(managerEmail !== undefined ? { managerEmail } : {}),
     ...(swaggerDescription !== undefined ? { swaggerDescription } : {}),
+    ...(jiraTicket !== undefined ? { jiraTicket: String(jiraTicket || "").trim() } : {}),
     updatedAt: new Date().toISOString()
   };
   db.data.projects[idx] = updated;
   await db.write();
 
-  const swagger = buildSwaggerFromProject(updated);
+  const swagger = buildSwaggerFromProject(updated); // נשאר
   res.json({ project: updated, swagger });
 });
 
-/* Swagger לפי פרויקט */
+/* Swagger לפי פרויקט – ללא שינוי */
 app.get("/api/projects/:id/swagger", async (req, res) => {
   await db.read();
   const proj = db.data.projects.find(p => p.id === req.params.id);
@@ -118,42 +120,21 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
-/* ====== MOCKS קיימים (לא שובר התנהגות קודמת) ====== */
-app.post("/api/generate-swagger", async (req, res) => {
-  // שומר את נקודת ה-AI הישנה כפי שהיא, כדי לא לשנות זרימות קיימות
-  const { title = "API", format = "yaml" } = req.body || {};
-  const yaml = `openapi: 3.0.3
-info:
-  title: ${String(title).replace(/\n/g, " ")}
-  version: 1.0.0
-  description: Generated preview from specification
-servers:
-  - url: https://api.example.com
-paths:
-  /items:
-    get:
-      summary: List items
-      responses:
-        '200':
-          description: OK
-`;
-  if (format === "json") {
-    return res.json({
-      swagger: JSON.stringify({
-        openapi: "3.0.3",
-        info: { title, version: "1.0.0", description: "Generated preview from specification" },
-        servers: [{ url: "https://api.example.com" }],
-        paths: { "/items": { get: { summary: "List items", responses: { "200": { description: "OK" } } } } }
-      }, null, 2)
-    });
-  }
-  res.json({ swagger: yaml });
-});
-
+/* ====== יצירת קוד מתוך האובייקט ====== */
 app.post("/api/generate-code", async (req, res) => {
   try {
-    const code = generateCodeFromSwagger(req.body?.swagger || "", req.body?.language || "node-express");
-    res.json({ code, language: req.body?.language || "node-express" });
+    await db.read();
+    const language = req.body?.language || "node-express";
+    let project = req.body?.project;
+
+    // אם הגיע projectId – נטען מה-DB
+    if (!project && req.body?.projectId) {
+      project = db.data.projects.find(p => p.id === req.body.projectId);
+    }
+    if (!project) return res.status(400).json({ message: "project or projectId is required" });
+
+    const code = generateCodeFromProject(project, language);
+    res.json({ code, language });
   } catch (e) {
     res.status(500).json({ message: "code generation failed", error: String(e) });
   }

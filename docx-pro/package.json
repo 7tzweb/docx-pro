@@ -1,0 +1,19 @@
+{
+  "name": "docx-pro",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "bootstrap": "npm --prefix ./server i && npm --prefix ./client i",
+    "dev": "concurrently -r -c blue,green \"npm --prefix ./server run dev\" \"npm --prefix ./client run dev\"",
+    "dev:server": "npm --prefix ./server run dev",
+    "dev:client": "npm --prefix ./client run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

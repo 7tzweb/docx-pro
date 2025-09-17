@@ -1,35 +1,6 @@
 import React from "react";
 import ProjectPicker from "./ProjectPicker"; // בוחר פרויקט עם חיפוש
 
-/**
- * AppHeader – כותרת עליונה + ניווט שלבים + פעולות
- *
- * props:
- *  - proc: שם התהליך (מחרוזת)
- *  - step: מספר שלב נוכחי (1|2|3)
- *  - onGotoStep(n)
- *  - loading: האם יש פעולה רצה
- *
- *  - a4Preview, onToggleA4(bool)
- *  - rtl, onToggleRTL(bool)
- *
- *  - currentProject: אובייקט פרויקט נוכחי (או null)
- *  - projects: רשימת פרויקטים לתיבה נפתחת
- *  - onLoadProject(id)  – בעת בחירה מרשימה
- *  - onCreateProject()  – כפתור "פרויקט חדש"
- *  - onEditProject()    – כפתור "עריכת פרויקט"
- *
- *  - downloadWord()
- *  - downloadSwagger()
- *  - downloadCode()
- *  - generateSwagger()  // היסטורי: בזרימה החדשה לא בשימוש מהכותרת (הבנייה נעשית אוטומטית)
- *  - generateCode()
- *  - lang, onChangeLang(value)
- *  - swaggerText (טקסט קיים לצורך Disable של יצירת קוד)
- *
- *  - readySteps: {1:boolean, 2:boolean, 3:boolean} – אילו שלבים מוכנים לניווט (בזמן בנייה מוצג לודר קטן)
- *  - building: האם מתבצעת בנייה/הכנה של השלבים (אופציונלי, להצגת סטטוס)
- */
 export default function AppHeader({
   proc,
   step,
@@ -50,22 +21,25 @@ export default function AppHeader({
   downloadWord,
   downloadSwagger,
   downloadCode,
-  generateSwagger, // נשמר לשם תאימות לאחור; לא מופעל מכאן בזרימה החדשה
+  generateSwagger, // תאימות לאחור
   generateCode,
   lang,
   onChangeLang,
   swaggerText,
 
-  // חדשים/אופציונליים:
+  // חדשים:
+  copyWord,
+  copySwagger,
+  copyCode,
+
+  // אופציונלי:
   readySteps = { 1: true, 2: true, 3: true },
   building,
 }) {
-  // כפתור שלב עם נעילה עד שהשלב מוכן
   const StepBtn = ({ n, children }) => {
     const active = step === n;
     const ready = !!readySteps[n];
-    const disabled = !ready;
-
+    const disabled = !ready || !!loading;
     return (
       <div
         className={`step ${active ? "active" : ""} ${disabled ? "disabled" : ""}`}
@@ -92,14 +66,12 @@ export default function AppHeader({
             </div>
           )}
 
-          {/* בחירת פרויקט – עם חיפוש (ProjectPicker) */}
           <ProjectPicker
             projects={projects || []}
             onSelect={(id) => id && onLoadProject?.(id)}
             buttonStyle={{ marginInlineStart: 12 }}
           />
 
-          {/* יצירה/עריכה */}
           <button className="btn btn-primary" style={{ marginInlineStart: 8 }} onClick={onCreateProject}>
             פרויקט חדש
           </button>
@@ -110,7 +82,7 @@ export default function AppHeader({
             </button>
           )}
 
-          {/* טוגל A4/RTL */}
+          {/* טוגלים */}
           <div style={{ marginInlineStart: "auto", display: "flex", gap: 14 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--muted)" }}>
               <input type="checkbox" checked={a4Preview} onChange={(e) => onToggleA4?.(e.target.checked)} />
@@ -123,7 +95,7 @@ export default function AppHeader({
           </div>
         </div>
 
-        {/* שלבים – ניווט חופשי כשהשלב מוכן */}
+        {/* שלבים */}
         <div className="steps">
           <StepBtn n={1}>שלב 1: אפיון</StepBtn>
           <StepBtn n={2}>שלב 2: Swagger</StepBtn>
@@ -134,26 +106,40 @@ export default function AppHeader({
         <div className="actions">
           <div className="right">
             {step === 1 && (
-              <button className="btn" onClick={downloadWord} disabled={!!loading || !readySteps[1]}>
-                {loading ? "יוצר…" : "הורד Word"}
-              </button>
+              <>
+                <button className="btn" onClick={downloadWord} disabled={!!loading || !readySteps[1]}>
+                  {loading ? "יוצר…" : "הורד Word"}
+                </button>
+                <button className="btn" onClick={copyWord} disabled={!!loading || !readySteps[1]} style={{ marginInlineStart: 8 }}>
+                  העתק Word
+                </button>
+              </>
             )}
+
             {step === 2 && (
-              <button className="btn" onClick={downloadSwagger} disabled={!readySteps[2]}>
-                הורד Swagger
-              </button>
+              <>
+                <button className="btn" onClick={downloadSwagger} disabled={!!loading || !readySteps[2]}>
+                  הורד Swagger
+                </button>
+                <button className="btn" onClick={copySwagger} disabled={!!loading || !readySteps[2] || !swaggerText} style={{ marginInlineStart: 8 }}>
+                  העתק Swagger
+                </button>
+              </>
             )}
+
             {step === 3 && (
-              <button className="btn" onClick={downloadCode} disabled={!readySteps[3]}>
-                הורד קוד
-              </button>
+              <>
+                <button className="btn" onClick={downloadCode} disabled={!!loading || !readySteps[3]}>
+                  הורד קוד
+                </button>
+                <button className="btn" onClick={copyCode} disabled={!!loading || !readySteps[3]} style={{ marginInlineStart: 8 }}>
+                  העתק קוד
+                </button>
+              </>
             )}
           </div>
 
           <div className="left">
-            {/* בזרימה החדשה אין יותר "עבור לשלב הבא (צור Swagger)" מהכותרת */}
-            {/* יצירת קוד עברה לשלב 3, כולל בחירת שפה */}
-
             {step === 3 && (
               <>
                 <select
@@ -165,25 +151,18 @@ export default function AppHeader({
                     borderRadius: "12px",
                     background: "#fff",
                     marginInlineEnd: "8px",
+                    minWidth: 120,
                   }}
-                  disabled={!readySteps[3]}
+                  disabled={!readySteps[3] || !!loading}
+                  title={loading ? "מחליף שפה…" : "בחר שפה"}
                 >
-                  {/* לפי הבקשה: בחירה בין Node.js ל-.NET */}
                   <option value="node-express">Node.js</option>
                   <option value="dotnet-webapi">.NET</option>
                 </select>
-
-                <button
-                  className="btn btn-primary"
-                  onClick={generateCode}
-                  disabled={!!loading || !String(swaggerText || "").trim() || !readySteps[3]}
-                >
-                  {loading ? "יוצר קוד…" : "צור קוד מה-Swagger"}
-                </button>
+                {/* אם תרצה גם כפתור יצירת קוד ידני */}
+                {/* <button className="btn" onClick={generateCode} disabled={!readySteps[3] || !!loading}>…צור קוד</button> */}
               </>
             )}
-
-           
           </div>
         </div>
       </div>

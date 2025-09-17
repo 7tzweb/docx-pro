@@ -14,6 +14,9 @@ function contactNameFromEmail(email = "") {
 
 function buildComponentsParameters(allHeaders) {
   const lines = [];
+  lines.push(`${IND(1)}# jwt security per method`);
+  lines.push(`${IND(1)}#security:`);
+  lines.push(`${IND(1)}#  - BearerAuth: []`);
   lines.push(`${IND(1)}parameters:`);
   lines.push(`${IND(2)}originalUserId:`);
   lines.push(`${IND(3)}name: originalUserId`);
@@ -60,13 +63,16 @@ function buildPathFromRequest(req) {
   lines.push(`${IND(3)}summary: ${req?.summary ? String(req.summary) : `Auto summary for ${method.toUpperCase()} ${url}`}`);
   lines.push(`${IND(3)}description: ${req?.description ? String(req.description) : `Auto description for ${method.toUpperCase()} ${url}`}`);
   lines.push(`${IND(3)}operationId: ${req?.operationId ? String(req.operationId) : (method + url.replace(/[\/{}-]+/g,"_"))}`);
+  lines.push(`${IND(3)}# jwt security per method`);
+  lines.push(`${IND(3)}#security:`);
+  lines.push(`${IND(3)}#  - BearerAuth: []`);
   if (uniqueHeaders.length) {
     lines.push(`${IND(3)}parameters:`);
     for (const h of uniqueHeaders) lines.push(`${IND(4)}- $ref: '#/components/parameters/${h}'`);
   }
   lines.push(`${IND(3)}responses:`);
   lines.push(`${IND(4)}'200':`);
-  lines.push(`${IND(5)}description: Success`);
+  lines.push(`${IND(5)}description: Successful`);
   return lines.join("\n");
 }
 
@@ -104,6 +110,7 @@ export function buildSwaggerFromProject(project = {}) {
   const desc = String(project?.swaggerDescription || "").trim();
   const email = String(project?.managerEmail || "").trim();
   const contactName = contactNameFromEmail(email) || name;
+  const jira = String(project?.jiraTicket || "").trim(); // ← נשלף מהפרויקט
 
   const headersSet = new Set();
   for (const r of project?.requests || []) {
@@ -124,7 +131,8 @@ export function buildSwaggerFromProject(project = {}) {
   y.push(`${IND(1)}contact:`);
   y.push(`${IND(2)}name: ${contactName}`);
   y.push(`${IND(2)}email: ${email || "api@example.com"}`);
-  y.push(`${IND(1)}x-jira-ticket: APIA-8584`);
+  y.push(`${IND(2)}# leumi openapi extensions`);
+  y.push(`${IND(1)}x-jira-ticket: ${jira || "APIA-8584"}`); // ← מוזרק מה-UI (עם fallback)
   y.push(`${IND(1)}x-api-template: TMPLT_Base_1.2.0 # do not change`);
   y.push(`${IND(1)}x-api-environment: campus  # default: campus`);
   y.push(`${IND(1)}x-api-organization: leumi #default: leumi`);
@@ -151,7 +159,7 @@ export function buildSwaggerFromProject(project = {}) {
   y.push(`${IND(1)}description: AAB approved Swagger`);
   y.push(``);
   y.push(`servers:`);
-  y.push(`${IND(1)}- url: https://api.example.com`);
+  y.push(`${IND(1)}# added apigee setup - only change when api version changes`);
   y.push(``);
   y.push(`paths:`);
 
@@ -180,5 +188,6 @@ export function buildSwaggerFromProject(project = {}) {
   y.push(`${IND(3)}example: K4F6TRW`);
   y.push(``);
   y.push(buildComponentsParameters(allHeaders));
+  
   return y.join("\n");
 }

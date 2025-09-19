@@ -1,4 +1,6 @@
 /* בניית Swagger (YAML) מתוך אובייקט פרויקט */
+import YAML from "yaml";
+
 const IND = (n) => "  ".repeat(n);
 
 const STD_HEADERS = new Set([
@@ -105,6 +107,16 @@ function buildVitalityPing(extra = {}) {
   return lines.join("\n");
 }
 
+/* הזרקת סכמות הפרויקט אל components.schemas */
+function emitProjectSchemasBlock(project = {}) {
+  const obj = project?.schemas;
+  if (!obj || typeof obj !== "object" || Array.isArray(obj) || !Object.keys(obj).length) return "";
+  const yaml = YAML.stringify(obj, { indent: 2 }).trimEnd().split("\n");
+  const lines = [];
+  for (const line of yaml) lines.push(IND(2) + line);
+  return lines.join("\n");
+}
+
 export function buildSwaggerFromProject(project = {}) {
   const name = String(project?.name || "API").trim();
   const desc = String(project?.swaggerDescription || "").trim();
@@ -186,6 +198,11 @@ export function buildSwaggerFromProject(project = {}) {
   y.push(`${IND(2)}User-id-ref:`);
   y.push(`${IND(3)}type: string`);
   y.push(`${IND(3)}example: K4F6TRW`);
+
+  // === הזרקה של סכמות הפרויקט (בסוף הקובץ תחת components.schemas) ===
+  const schemasBlock = emitProjectSchemasBlock(project);
+  if (schemasBlock) y.push(schemasBlock);
+
   y.push(``);
   y.push(buildComponentsParameters(allHeaders));
   

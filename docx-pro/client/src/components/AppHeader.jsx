@@ -56,7 +56,7 @@ export default function AppHeader({
   return (
     <div className="header">
       <div className="container">
-        {/* שורה עליונה */}
+        {/* שורה עליונה - זהה */}
         <div className="toprow">
           <div className="process-pill">{proc}</div>
 
@@ -69,21 +69,21 @@ export default function AppHeader({
           <ProjectPicker
             projects={projects || []}
             onSelect={(id) => id && onLoadProject?.(id)}
-            buttonStyle={{ marginInlineStart: 12 }}
+            buttonStyle={{ marginInlineStart: 10 }}
           />
 
-          <button className="btn btn-primary" style={{ marginInlineStart: 8 }} onClick={onCreateProject}>
+          <button className="btn btn-primary" style={{ marginInlineStart: 6 }} onClick={onCreateProject}>
             פרויקט חדש
           </button>
 
           {currentProject && (
-            <button className="btn" style={{ marginInlineStart: 8 }} onClick={onEditProject}>
+            <button className="btn" style={{ marginInlineStart: 6 }} onClick={onEditProject}>
               עריכת פרויקט
             </button>
           )}
 
           {/* טוגלים */}
-          <div style={{ marginInlineStart: "auto", display: "flex", gap: 14 }}>
+          <div style={{ marginInlineStart: "auto", display: "flex", gap: 12 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--muted)" }}>
               <input type="checkbox" checked={a4Preview} onChange={(e) => onToggleA4?.(e.target.checked)} />
               תצוגת A4 (סימולציה)
@@ -95,22 +95,24 @@ export default function AppHeader({
           </div>
         </div>
 
-        {/* שלבים */}
-        <div className="steps">
-          <StepBtn n={1}>שלב 1: אפיון</StepBtn>
-          <StepBtn n={2}>שלב 2: Swagger</StepBtn>
-          <StepBtn n={3}>שלב 3: קוד</StepBtn>
-        </div>
+        {/* שורה שנייה: שלבים + פעולות (באותה שורה) */}
+        <div className="steps actions-inline">
+          {/* צד ימין: שלבים */}
+          <div className="steps-left">
+            <StepBtn n={1}>שלב 1: אפיון</StepBtn>
+            <StepBtn n={2}>שלב 2: Swagger</StepBtn>
+            <StepBtn n={3}>שלב 3: קוד</StepBtn>
+          </div>
 
-        {/* פעולות */}
-        <div className="actions">
-          <div className="right">
+          {/* צד שמאל: כפתורי פעולה + בורר שפה (באותה השורה) */}
+          <div className="steps-right">
+            {/* כפתורי הורדה/העתקה לפי שלב */}
             {step === 1 && (
               <>
                 <button className="btn" onClick={downloadWord} disabled={!!loading || !readySteps[1]}>
                   {loading ? "יוצר…" : "הורד Word"}
                 </button>
-                <button className="btn" onClick={copyWord} disabled={!!loading || !readySteps[1]} style={{ marginInlineStart: 8 }}>
+                <button className="btn" onClick={copyWord} disabled={!!loading || !readySteps[1]}>
                   העתק Word
                 </button>
               </>
@@ -121,7 +123,7 @@ export default function AppHeader({
                 <button className="btn" onClick={downloadSwagger} disabled={!!loading || !readySteps[2]}>
                   הורד Swagger
                 </button>
-                <button className="btn" onClick={copySwagger} disabled={!!loading || !readySteps[2] || !swaggerText} style={{ marginInlineStart: 8 }}>
+                <button className="btn" onClick={copySwagger} disabled={!!loading || !readySteps[2] || !swaggerText}>
                   העתק Swagger
                 </button>
               </>
@@ -132,25 +134,17 @@ export default function AppHeader({
                 <button className="btn" onClick={downloadCode} disabled={!!loading || !readySteps[3]}>
                   הורד קוד
                 </button>
-                <button className="btn" onClick={copyCode} disabled={!!loading || !readySteps[3]} style={{ marginInlineStart: 8 }}>
+                <button className="btn" onClick={copyCode} disabled={!!loading || !readySteps[3]}>
                   העתק קוד
                 </button>
-              </>
-            )}
-          </div>
-
-          <div className="left">
-            {step === 3 && (
-              <>
                 <select
                   value={lang}
                   onChange={(e) => onChangeLang?.(e.target.value)}
                   style={{
-                    padding: "10px 12px",
+                    padding: "8px 10px",
                     border: "1px solid var(--border)",
                     borderRadius: "12px",
                     background: "#fff",
-                    marginInlineEnd: "8px",
                     minWidth: 120,
                   }}
                   disabled={!readySteps[3] || !!loading}
@@ -159,8 +153,6 @@ export default function AppHeader({
                   <option value="node-express">Node.js</option>
                   <option value="dotnet-webapi">.NET</option>
                 </select>
-                {/* אם תרצה גם כפתור יצירת קוד ידני */}
-                {/* <button className="btn" onClick={generateCode} disabled={!readySteps[3] || !!loading}>…צור קוד</button> */}
               </>
             )}
           </div>

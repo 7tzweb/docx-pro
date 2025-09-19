@@ -13,7 +13,7 @@ npm install
 
 
 cd client
-npm start
+npm npm run dev
 cd server
 node server.mjs
 
@@ -23,4 +23,10 @@ npx concurrently "cd server && node server.mjs" "cd client && npm run dev"
 
 
 npm run build
+
+
+
+cd docx-pro
+npm run dev
+
 ```

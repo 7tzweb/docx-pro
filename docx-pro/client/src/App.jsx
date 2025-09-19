@@ -11,6 +11,7 @@ const AI_SWAGGER_URL = `${API_BASE}/api/generate-swagger`;
 const AI_CODE_URL    = `${API_BASE}/api/generate-code`;
 const PROJECTS_URL   = `${API_BASE}/api/projects`;
 const PROJECT_SWAGGER_URL = (id) => `${API_BASE}/api/projects/${id}/swagger`;
+const PROJECT_APPENDIX_URL = (id, rtl) => `${API_BASE}/api/projects/${id}/appendix?rtl=${rtl ? "true" : "false"}`;
 
 /** הזרקה/עדכון של בלוק המבוא בתוך תוכן העורך */
 function ensureIntroInEditor(currentHtml, introHtml) {
@@ -114,6 +115,19 @@ export default function App(){
     }catch(e){ console.error(e); }
   }
 
+  async function composeFullHtmlForProject(projectObj){
+    // 1) intro
+    const withIntro = ensureIntroInEditor("", projectObj?.introText || "");
+    // 2) appendix מהשרת (אותה לוגיקה בדיוק כמו ל-DOCX)
+    let appendix = "";
+    try{
+      const resp = await fetch(PROJECT_APPENDIX_URL(projectObj.id, rtl));
+      appendix = resp.ok ? await resp.text() : "";
+    }catch{}
+    // 3) חיבור למסמך אחד
+    return `${withIntro}\n${appendix}`;
+  }
+
   async function loadProject(id){
     try{
       const resp = await fetch(`${PROJECTS_URL}/${id}`);
@@ -121,7 +135,11 @@ export default function App(){
       const data = await resp.json();
       setCurrentProject(data.project);
       if (data?.project?.name) setTitle(`מסמך אפיון ${data.project.name}`);
-      setSpecHtml(prev => ensureIntroInEditor(prev, data?.project?.introText || ""));
+
+      // במקום רק להזריק intro – בונים את כל המסמך (מבוא + נספח) ומציגים בעורך
+      const fullHtml = await composeFullHtmlForProject(data.project);
+      setSpecHtml(fullHtml);
+
       try {
         const sw = await fetch(PROJECT_SWAGGER_URL(id));
         if (sw.ok) setSwaggerText(await sw.text());
@@ -137,8 +155,13 @@ export default function App(){
       const resp = await fetch(DOCX_API_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // ← נוסף project (אופציונלי; השרת יתעלם אם לא נשלח)
-        body: JSON.stringify({ title, html: specHtml, rtl, project: currentProject })
+        body: JSON.stringify({
+          title,
+          html: specHtml,
+          rtl,
+          project: currentProject,
+          projectId: currentProject?.id,
+        })
       });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
       const blob = await resp.blob();
@@ -254,7 +277,11 @@ paths: {}
         if (!resp.ok) throw new Error(data?.message || `HTTP ${resp.status}`);
         setCurrentProject(data.project);
         if (data?.project?.name) setTitle(`מסמך אפיון ${data.project.name}`);
-        setSpecHtml(prev => ensureIntroInEditor(prev, data?.project?.introText || ""));
+
+        // נבנה את כל המסמך (intro + appendix) ונציג בעורך
+        const fullHtml = await composeFullHtmlForProject(data.project);
+        setSpecHtml(fullHtml);
+
         if (data?.swagger) setSwaggerText(data.swagger);
         localStorage.setItem("lastProjectId", data.project.id);
 
@@ -271,7 +298,10 @@ paths: {}
         if (!resp.ok) throw new Error(data?.message || `HTTP ${resp.status}`);
         setCurrentProject(data.project);
         if (data?.project?.name) setTitle(`מסמך אפיון ${data.project.name}`);
-        setSpecHtml(prev => ensureIntroInEditor(prev, data?.project?.introText || ""));
+
+        const fullHtml = await composeFullHtmlForProject(data.project);
+        setSpecHtml(fullHtml);
+
         if (data?.swagger) setSwaggerText(data.swagger);
         localStorage.setItem("lastProjectId", data.project.id);
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import RichTextEditor from "./RichTextEditor";
 import RequestEditor from "./RequestEditor";
+import SchemaBuilder from "./SchemaBuilder";
 
 /**
  * ProjectModal – יצירה/עריכת פרויקט מלא.
@@ -10,36 +11,56 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
 
   const [name, setName] = useState("");
   const [managerEmail, setManagerEmail] = useState("");
-  const [jiraTicket, setJiraTicket] = useState("");          // ← חדש
+  const [jiraTicket, setJiraTicket] = useState("");
   const [introText, setIntroText] = useState("");
   const [requests, setRequests] = useState([]);
   const [extra, setExtra] = useState({ vitality: false, ping: false });
+
+  // טקסט הסכמה (JSON/YAML) נשמר ברמת המודאל – נשלח לשרת בעת שמירה
+  const [schemaText, setSchemaText] = useState("");
+  const [schemaView] = useState("yaml"); // נשמר ל־SchemaBuilder; ניתן להחליף אם תרצה
+  const [schemasCount, setSchemasCount] = useState(0);
+  const [schemaError, setSchemaError] = useState("");
 
   useEffect(() => {
     if (!open) return;
     if (isEdit && initial) {
       setName(initial.name || "");
       setManagerEmail(initial.managerEmail || "");
-      setJiraTicket(initial.jiraTicket || "");               // ← חדש
+      setJiraTicket(initial.jiraTicket || "");
       setIntroText(initial.introText || "");
-      setRequests(Array.isArray(initial.requests) ? [...initial.requests] : []);
+      const reqs = (Array.isArray(initial.requests) ? initial.requests : []).filter(Boolean);
+      setRequests(reqs);
       setExtra({ vitality: !!initial?.extra?.vitality, ping: !!initial?.extra?.ping });
+
+      // העדפה לטקסט סכמה (אם שמור בפרויקט)
+      if (typeof initial?.schema === "string" && initial.schema.trim()) {
+        setSchemaText(initial.schema);
+      } else if (initial?.schemas && typeof initial.schemas === "object") {
+        try { setSchemaText(require("yaml").stringify(initial.schemas, { indent: 2 })); }
+        catch { setSchemaText(""); }
+      } else {
+        setSchemaText("");
+      }
+      setSchemaError("");
+      setSchemasCount(countSchemasSafe(initial?.schemas));
     } else {
       setName("");
       setManagerEmail("");
-      setJiraTicket("");                                     // ← חדש
+      setJiraTicket("");
       setIntroText("");
-      setRequests([{
-        id: cryptoRandomId(), url: "", method: "GET", stdHeaders: [],
-        headers: "", request: "", response: "", summary: "", description: "", operationId: "",
-      }]);
+      setRequests([defaultRequest()]);
       setExtra({ vitality: false, ping: false });
+      setSchemaText("");
+      setSchemaError("");
+      setSchemasCount(0);
     }
   }, [open, isEdit, initial]);
 
   const validEmail = useMemo(() => /^\S+@\S+\.\S+$/.test(managerEmail), [managerEmail]);
-  const canSave = name.trim().length > 0 && validEmail;
+  const canSave = name.trim().length > 0 && validEmail && !schemaError;
 
+  // ===== Requests helpers =====
   function updateRequest(idx, patch) {
     setRequests((prev) => {
       const next = [...prev];
@@ -56,23 +77,24 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
       return next;
     });
   }
-  function deleteRequest(idx) { setRequests((prev) => prev.filter((_, i) => i !== idx)); }
+  function deleteRequest(idx) {
+    setRequests((prev) => prev.filter((_, i) => i !== idx));
+  }
   function addRequest() {
-    setRequests((prev) => [...prev, {
-      id: cryptoRandomId(), url: "", method: "GET", stdHeaders: [],
-      headers: "", request: "", response: "", summary: "", description: "", operationId: "",
-    }]);
+    setRequests((prev) => [...prev, defaultRequest()]);
   }
 
+  // ===== Save =====
   async function handleSave() {
     if (!canSave) return;
     const payload = {
       name: name.trim(),
       managerEmail: managerEmail.trim(),
-      jiraTicket: (jiraTicket || "").trim(),                 // ← נשלח לשרת
+      jiraTicket: jiraTicket.trim(),
       introText: introText || "",
       requests,
       extra: { ...extra },
+      schema: schemaText || "", // השרת ייצור components.schemas מתוך זה
     };
     await onSave?.(payload);
   }
@@ -83,18 +105,18 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
     <div style={backdropStyle} onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
       <div style={{ ...modalStyle, direction: rtl ? "rtl" : "ltr", textAlign: rtl ? "right" : "left" }}>
         <div style={headerStyle}>
-          <div style={{ fontWeight: 700, fontSize: 18 }}>{isEdit ? "עריכת פרויקט" : "פרויקט חדש"}</div>
+          <div style={{ fontWeight: 700, fontSize: 18 }}>
+            {isEdit ? "עריכת פרויקט" : "פרויקט חדש"}
+          </div>
           <button className="btn" onClick={onClose}>סגור</button>
         </div>
 
-        {/* שם + מייל + Jira */}
+        {/* פרטי פרויקט */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 12 }}>
-          <div>
-            <div style={labelStyle}>שם הפרויקט</div>
-            <input style={inputStyle} value={name} onChange={(e) => setName(e.target.value)} placeholder="MyService" />
-          </div>
-          <div>
-            <div style={labelStyle}>מייל מנהל הפרויקט</div>
+          <Labeled label="שם הפרויקט">
+            <input style={inputStyle} value={name} onChange={(e)=>setName(e.target.value)} placeholder="MyService" />
+          </Labeled>
+          <Labeled label="מייל מנהל הפרויקט">
             <input
               style={{ ...inputStyle, borderColor: managerEmail && !validEmail ? "#ff6b6b" : "var(--border)" }}
               value={managerEmail}
@@ -104,25 +126,26 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
             {!validEmail && managerEmail ? (
               <div style={{ color: "#ff6b6b", fontSize: 12, marginTop: 4 }}>מייל לא תקין</div>
             ) : null}
-          </div>
-          <div>
-            <div style={labelStyle}>Jira Ticket</div>
-            <input style={inputStyle} value={jiraTicket} onChange={(e) => setJiraTicket(e.target.value)} placeholder="APIA-1234" />
-          </div>
+          </Labeled>
+          <Labeled label="Jira Ticket">
+            <input style={inputStyle} value={jiraTicket} onChange={(e)=>setJiraTicket(e.target.value)} placeholder="APIA-1234" />
+          </Labeled>
         </div>
 
-        {/* טקסט מבוא למסמך */}
+        {/* מבוא למסמך */}
         <details open={false} style={{ marginBottom: 12 }}>
-          <summary style={{ cursor: "pointer", color: "var(--muted)", marginBottom: 8 }}>טקסט מבוא למסמך (אופציונלי)</summary>
-          <RichTextEditor value={introText} onChange={setIntroText} rtl={rtl} height={320} />
+          <summary style={{ cursor: "pointer", color: "var(--muted)", marginBottom: 8 }}>
+            טקסט מבוא למסמך (אופציונלי)
+          </summary>
+          <RichTextEditor value={introText} onChange={setIntroText} rtl={rtl} height={360} />
         </details>
 
         {/* רשימת בקשות */}
         <div style={{ fontSize: 14, fontWeight: 600, margin: "6px 0" }}>בקשות API</div>
-        {requests.map((r, idx) => (
+        {requests.map((req, idx) => (
           <RequestEditor
-            key={r.id || idx}
-            r={r}
+            key={req?.id || idx}
+            r={req || {}}
             idx={idx}
             rtl={rtl}
             onChange={(patch) => updateRequest(idx, patch)}
@@ -132,36 +155,117 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
         ))}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "6px 0 12px" }}>
           <button className="btn" onClick={addRequest}>הוסף בקשה</button>
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input type="checkbox" checked={!!extra?.ping} onChange={(e) => setExtra((x) => ({ ...x, ping: e.target.checked }))} />
-              ping
-            </label>
-            <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
-              <input type="checkbox" checked={!!extra?.vitality} onChange={(e) => setExtra((x) => ({ ...x, vitality: e.target.checked }))} />
-              vitality
-            </label>
-          </div>
+          <div />
         </div>
 
-        {/* כפתורי פעולה */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 8 }}>
+        {/* === Schema – Accordion (סגור כברירת-מחדל) === */}
+        <details className="schema-accordion" open={false}>
+          <summary className="schema-accordion-summary">
+            <span className="tag">Schema</span>
+            <span className="muted"> יצירת סכמה מלאה</span>
+            {/* <code className="inline">components.schemas</code> */}
+            {schemaError ? (
+              <span className="badge error" style={{ marginInlineStart: 8 }}>שגיאה</span>
+            ) : (
+              <span className="badge ok" style={{ marginInlineStart: 8 }}>{schemasCount} פרמטרים</span>
+            )}
+          </summary>
+
+          <SchemaBuilder
+            initialText={schemaText}
+            initialView={schemaView}
+            onTextChange={(t) => setSchemaText(t)}
+            onStats={({ count, error }) => { setSchemasCount(count ?? 0); setSchemaError(error ? String(error) : ""); }}
+          />
+        </details>
+
+        {/* ping + vitality */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 16, alignItems: "center", marginTop: 10 }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <input type="checkbox" checked={!!extra?.ping} onChange={(e)=>setExtra(x=>({ ...x, ping: e.target.checked }))} />
+            ping
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <input type="checkbox" checked={!!extra?.vitality} onChange={(e)=>setExtra(x=>({ ...x, vitality: e.target.checked }))} />
+            vitality
+          </label>
+        </div>
+
+        {/* פעולות */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
           <button className="btn" onClick={onClose}>ביטול</button>
-          <button className="btn primary" disabled={!canSave} onClick={handleSave}>{isEdit ? "עדכן" : "צור"}</button>
+          <button className="btn primary" disabled={!canSave} onClick={handleSave}>
+            {isEdit ? "עדכן" : "צור"}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-/* === styles === */
-const backdropStyle = { position: "fixed", inset: 0, background: "rgba(20,22,38,0.42)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 };
-const modalStyle = { width: "min(1020px, 96vw)", maxHeight: "90vh", overflow: "auto", background: "#fff", borderRadius: 16, border: "1px solid var(--border)", padding: 16, boxShadow: "0 20px 70px rgba(0,0,0,0.25)" };
-const headerStyle = { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 };
-const labelStyle = { fontSize: 13, color: "var(--muted)", marginBottom: 4 };
-const inputStyle = { width: "100%", padding: "10px 12px", border: "1px solid var(--border)", borderRadius: 12, background: "#fff" };
-
+/* ===== helpers (קצרים שנשארו במודאל) ===== */
+function defaultRequest() {
+  return {
+    id: cryptoRandomId(),
+    url: "",
+    method: "GET",
+    stdHeaders: [],
+    headers: "",
+    request: "",
+    response: "",
+    summary: "",
+    description: "",
+    operationId: "",
+  };
+}
+function countSchemasSafe(o) {
+  if (!o || typeof o !== "object" || Array.isArray(o)) return 0;
+  return Object.keys(o).length;
+}
 function cryptoRandomId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) return crypto.randomUUID();
   return "id-" + Math.random().toString(36).slice(2, 10);
 }
+function Labeled({ label, children }) {
+  return (
+    <div>
+      <div style={labelStyle}>{label}</div>
+      {children}
+    </div>
+  );
+}
+
+/* ===== styles מקומיים (ללא שינוי הקיים) ===== */
+const backdropStyle = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(20,22,38,0.42)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1000,
+};
+const modalStyle = {
+  width: "min(1320px, 98vw)",
+  maxHeight: "94vh",
+  overflow: "auto",
+  background: "#fff",
+  borderRadius: 16,
+  border: "1px solid var(--border)",
+  padding: 20,
+  boxShadow: "0 20px 70px rgba(0,0,0,0.25)",
+};
+const headerStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: 12,
+};
+const labelStyle = { fontSize: 13, color: "var(--muted)", marginBottom: 4 };
+const inputStyle = {
+  width: "100%",
+  padding: "10px 12px",
+  border: "1px solid var(--border)",
+  borderRadius: 12,
+  background: "#fff",
+};

@@ -36,14 +36,15 @@ function h2(txt) { return `<h2 style="margin:28px 0 6px; font-size:20px;">${asTi
 function h3(txt) { return `<h3 style="margin:16px 0 6px; font-size:16px;">${asTitle(txt)}</h3>`; }
 function p(txt)  { return `<p style="margin:6px 0; font-size:12px; white-space:pre-wrap;">${esc(txt)}</p>`; }
 
-/** טבלת 5 עמודות */
+/** טבלת 5 עמודות – ללא THEAD (תאימות טובה יותר ל-Word) */
 function table5(head, rows) {
-  const th = (t) => `<th style="background:#dfe7f3; border:1px solid #999; padding:6px; font-size:12px;">${esc(t)}</th>`;
+  const thCell = (t) => `<td style="background:#dfe7f3; border:1px solid #999; padding:6px; font-size:12px; font-weight:700;">${esc(t)}</td>`;
   const td = (t) => `<td style="border:1px solid #999; padding:6px; font-size:12px; vertical-align:top; word-break:break-word;">${t ?? ""}</td>`;
 
   const openRow  = (label) => `<tr><td colspan="5" style="background:#e6e6e6; border:1px solid #999; padding:6px; font-weight:700;">${esc(label)} — אלמנט פותח</td></tr>`;
   const closeRow = (label) => `<tr><td colspan="5" style="background:#e6e6e6; border:1px solid #999; padding:6px; font-weight:700;">${esc(label)} — אלמנט סוגר</td></tr>`;
 
+  const headerRow = `<tr>${head.map(thCell).join("")}</tr>`;
   const bodyHtml = rows.map((r) => {
     if (r && r.__open)  return openRow(r.__open);
     if (r && r.__close) return closeRow(r.__close);
@@ -52,8 +53,7 @@ function table5(head, rows) {
 
   return `
     <table style="width:100%; border-collapse:collapse; margin:8px 0;">
-      <thead><tr>${head.map(th).join("")}</tr></thead>
-      <tbody>${bodyHtml}</tbody>
+      <tbody>${headerRow}${bodyHtml}</tbody>
     </table>`;
 }
 
@@ -132,7 +132,7 @@ function buildQueryRowsFromUrl(url = "") {
 }
 
 /** נספח לכל בקשה */
-function buildAppendixFromProject(project = {}, rtl = true) {
+export function buildAppendixFromProject(project = {}, rtl = true) {
   const reqs = Array.isArray(project?.requests) ? project.requests : [];
   if (!reqs.length) return "";
 
@@ -145,7 +145,9 @@ function buildAppendixFromProject(project = {}, rtl = true) {
   for (const r of reqs) {
     const method = String(r?.method || "GET").toUpperCase();
     const url    = String(r?.url || "/path");
-    parts.push(h3(`${method} ${url}`));
+
+    // כותרת עם סוג הבקשה בלבד
+    parts.push(h3(method));
 
     // כתובת הבקשה
     parts.push(h3("כתובת הבקשה"));
@@ -159,7 +161,7 @@ function buildAppendixFromProject(project = {}, rtl = true) {
     ].filter(Boolean).join("\n");
     if (metaLines) parts.push(p(metaLines));
 
-    // Headers
+    // Headers (כולל אלמנט פותח/סוגר)
     const headers = buildHeaderRows(r);
     if (headers.length) {
       parts.push(h3("Headers"));
@@ -189,7 +191,7 @@ function buildAppendixFromProject(project = {}, rtl = true) {
       ));
     }
 
-    // Body (רק אם המתודה לא GET ויש JSON בדוגמה)
+    // Body (למתודות שאינן GET, אם קיים JSON)
     const reqBody = tryParseJSON(r?.request);
     if (method !== "GET" && reqBody !== undefined) {
       parts.push(h3("Body"));
@@ -200,7 +202,7 @@ function buildAppendixFromProject(project = {}, rtl = true) {
       ));
     }
 
-    // Response
+    // Response (כולל אלמנט פותח/סוגר)
     const resBody = tryParseJSON(r?.response);
     if (resBody !== undefined) {
       parts.push(h3("Response"));
@@ -211,6 +213,5 @@ function buildAppendixFromProject(project = {}, rtl = true) {
       ));
     }
   }
-
   return parts.join("\n");
 }

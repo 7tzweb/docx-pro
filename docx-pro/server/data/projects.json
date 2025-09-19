@@ -3,15 +3,16 @@
     {
       "id": "KD7vmICOFrEm",
       "name": "AccessEntitlement_AioSubscriberAccountsg",
-      "introText": "<p class=\"p1\"><strong> </strong></p>\n<h1 dir=\"rtl\">MicroService spec</h1>\n<h2 dir=\"rtl\">חוקים גנריים לפקדונות DIY</h2>\n<p dir=\"rtl\">תוכן עניינים</p>\n<p dir=\"rtl\">1.                                מטרת השירות. 3</p>\n<p dir=\"rtl\">2.                               הרשאות גישה (jwt  / תעודות וכו' ) 3</p>\n<p dir=\"rtl\">3.                                תהליכים, Endpoints. 4</p>\n<p dir=\"rtl\">4.                               GET/ deposit-diy-rulesets-ms /Deposit/EngineRuleset/{model}  4</p>\n<p dir=\"rtl\">5.                                diagram.. 7</p>\n<p dir=\"rtl\">6.                                הודעות שגיאה. 8</p>\n<p dir=\"rtl\">7.                                מקורות המידע. 9</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<p class=\"p1\"><strong> </strong></p>\n<p dir=\"ltr\"> </p>\n<p dir=\"rtl\">ניהול שינויים</p>\n<div dir=\"rtl\" align=\"left\">\n<table><colgroup><col width=\"65\"><col width=\"81\"><col width=\"91\"><col width=\"285\"><col width=\"80\"></colgroup>\n<tbody>\n<tr>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מהדורה</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">תאריך</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מבצע השינוי</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">תמצית השינוי</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מזהה תכולת מערכת</p>\n</td>\n</tr>\n<tr>\n<td dir=\"ltr\">\n<p dir=\"rtl\">1</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">28/02/2024</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">ליאב</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מהדורה ראשונה</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\"> </p>\n</td>\n</tr>\n</tbody>\n</table>\n</div>\n<p dir=\"rtl\"> </p>\n<p class=\"p1\"><strong> </strong></p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<h1 dir=\"rtl\">1.   מטרת השירות</h1>\n<p dir=\"rtl\">לנהל חוקים גנריים עבור פקדונות DIY.</p>\n<p dir=\"rtl\">באמצעות שירות זה ניתן יהיה לקבל חוק גנרי. </p>\n<p dir=\"rtl\"> </p>\n<h1 dir=\"rtl\">2.   הרשאות גישה (jwt  / תעודות וכו' )</h1>\n<p class=\"p1\"><strong> </strong></p>\n<p dir=\"ltr\"> </p>\n<p dir=\"rtl\"> </p>\n<h1 dir=\"rtl\">3.   תהליכים, Endpoints</h1>\n<p dir=\"rtl\">                    </p>\n<p dir=\"rtl\">ניתן להפעיל שירות זה על ידי העברת מספר דגם (model Number) שיועבר כפרמטר. אם מעוניינים לקבל את כל סט החוקים עבור הדגם, אין להעביר ב-queryString פרמטר נוסף. אם מעוניינים לקבל חוק ספציפי עבור הדגם, יש להעביר ב-query string את החוק (ruleNumber), בנוסף למספר הדגם שיועבר כפרמטר.</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\">יש לפנות למונגו ל-DB בשם diy_customer_deposit לקולקשן בשם 'rulesets' ומשם לבצע שליפה לפי הפילטור הבא:</p>\n<p dir=\"rtl\">פילטור לפי דגם:</p>\n<p dir=\"rtl\">{modelNumber: \" model-number '}</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\">פילטור לפי דגם וחוק:</p>\n<p dir=\"rtl\">{modelNumber: \" model-number '}</p>\n<p dir=\"rtl\">ולאחר השליפה נבצע פילטור ע\"פ מספר חוק.</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\">ה-DB של המונגו נמצא בשרתים הבאים לפי סביבה:</p>\n<p class=\"p1\"> </p>",
+      "introText": "<p class=\"p1\"><strong> </strong></p>\n<h1 dir=\"rtl\">MicroService spec</h1>\n<h2 dir=\"rtl\">חוקים גנריים לפקדונות DIY</h2>\n<p dir=\"rtl\">תוכן עניינים</p>\n<p dir=\"rtl\">1.                                מטרת השירות. 3</p>\n<p dir=\"rtl\">2.                               הרשאות גישה (jwt  / תעודות וכו' ) 3</p>\n<p dir=\"rtl\">3.                                תהליכים, Endpoints. 4</p>\n<p dir=\"rtl\">4.                               GET/ deposit-diy-rulesets-ms /Deposit/EngineRuleset/{model}  4</p>\n<p dir=\"rtl\">5.                                diagram.. 7</p>\n<p dir=\"rtl\">6.                                הודעות שגיאה. 8</p>\n<p dir=\"rtl\">7.                                מקורות המידע. 9</p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<p class=\"p1\"><strong> </strong></p>\n<p dir=\"ltr\"> </p>\n<p dir=\"rtl\">ניהול שינויים</p>\n<div dir=\"rtl\" align=\"left\">\n<table><colgroup><col width=\"65\"><col width=\"81\"><col width=\"91\"><col width=\"285\"><col width=\"80\"></colgroup>\n<tbody>\n<tr>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מהדורה</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">תאריך</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מבצע השינוי</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">תמצית השינוי</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מזהה תכולת מערכת</p>\n</td>\n</tr>\n<tr>\n<td dir=\"ltr\">\n<p dir=\"rtl\">1</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">28/02/2024</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">ליאב</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\">מהדורה ראשונה</p>\n</td>\n<td dir=\"ltr\">\n<p dir=\"rtl\"> </p>\n</td>\n</tr>\n</tbody>\n</table>\n</div>\n<p dir=\"rtl\"> </p>\n<p class=\"p1\"><strong> </strong></p>\n<p dir=\"rtl\"> </p>\n<p dir=\"rtl\"> </p>\n<h1 dir=\"rtl\">1.   מטרת השירות</h1>\n<p dir=\"rtl\">לנהל חוקים גנריים עבור פקדונות DIY.</p>\n<p dir=\"rtl\">באמצעות שירות זה ניתן יהיה לקבל חוק גנרי. </p>\n<p dir=\"rtl\"> </p>\n<p class=\"p1\"> </p>",
       "requests": [
         {
+          "schema": "",
           "id": "moaik7ng",
           "url": "/AccessEntitlement/user-profile/user/{originalUserId}",
           "method": "GET",
           "headers": "",
           "request": "dfdfdafddf",
-          "response": "dfdfdf",
+          "response": "dfdfdf13",
           "stdHeaders": [
             "x-transaction-id",
             "x-message-id",
@@ -33,10 +34,268 @@
         "ping": true
       },
       "createdAt": "2025-09-14T11:30:39.521Z",
-      "updatedAt": "2025-09-17T07:54:04.156Z",
+      "updatedAt": "2025-09-19T07:53:52.126Z",
       "managerEmail": "tsohar.zigdon@bankleumi.co.il",
       "swaggerDescription": "The service gets the folllowing parameters from the login digital process \n    \n        - subscriptionNumber - the user subscribtion number\n\n      and returns \n    \n        subscription Number and relevant data \n      \n          List of customers of the subscription \n      \n            List of related user accounts(JONI) from ODS. \n            \n          List of Profiles\n    \n    Incase the approaching system is Business application or web The service will access the joni business tables, otherwise The service will access the joni private tables\n    Data is retrieved from `##ODS##",
-      "jiraTicket": "APIA-8584"
+      "jiraTicket": "APIA-8584",
+      "schema": "LoginResponse:\n  type: object\n  properties:\n    subscriptionNumber:\n      $ref: \"#/components/schemas/SubscriptionNumber\"\n    originalUserId:\n      $ref: \"#/components/schemas/OriginalUser\"\n    firstName:\n      type: string\n      description: customer first name\n      example: בינה\n      maxLength: 14\n      nullable: true\n    lastName:\n      type: string\n      description: customer last name\n      example: באגד\n      maxLength: 20\n      nullable: true\n    foreignFirstName:\n      type: string\n      description: english customer first name\n      example: bina\n      maxLength: 14\n      nullable: true\n    foreignLastName:\n      type: string\n      description: english customer last name\n      example: bagad\n      maxLength: 20\n      nullable: true\n    dateOfBirth:\n      $ref: \"#/components/schemas/IsoDate\"\n    feeBank:\n      $ref: \"#/components/schemas/Bank\"\n    feeBranchNumber:\n      $ref: \"#/components/schemas/Branch\"\n    feeAcountType:\n      $ref: \"#/components/schemas/AccountType\"\n    feeAcountNumber:\n      $ref: \"#/components/schemas/AccountNumber\"\n    leadingBank:\n      $ref: \"#/components/schemas/Bank\"\n    leadingBranchNumber:\n      $ref: \"#/components/schemas/Branch\"\n    leadingAccountType:\n      $ref: \"#/components/schemas/AccountType\"\n    leadingAccountNumber:\n      $ref: \"#/components/schemas/AccountNumber\"\n    userOpeningDate:\n      $ref: \"#/components/schemas/IsoDate\"\n    personalId:\n      $ref: \"#/components/schemas/PersonalId\"\n    idType:\n      $ref: \"#/components/schemas/IdType\"\n    countryCode:\n      $ref: \"#/components/schemas/CountryCode\"\n    subscriberSector:\n      type: string\n      description: subscriber business sector\n      example: 10\n      pattern: ^[0-9]{1,2}$\n      nullable: true\n    websiteNumber:\n      $ref: \"#/components/schemas/WebsiteNumber\"\n    authorizedToOpreations:\n      type: boolean\n      description: is authorized to operate in the web\\application\n      example: true\n    subscriberPhoneAuthorization:\n      type: string\n      description: the type of autorization to perform operations over the phone\n      example: 3\n      nullable: true\n    subscriberTimestamp:\n      $ref: \"#/components/schemas/IsoDateTime\"\n    identificationQuestions:\n      type: boolean\n      description: is the user has identification questions\n      example: false\n    divisionType:\n      type: string\n      description: calculated division type\n      example: BI\n      nullable: true\n    subscriberInvolvement:\n      type: string\n      description: subcriber ownership\n      example: 1\n      nullable: true\n    greenMail:\n      type: string\n      description: Reference to the screen reading miles when there are non called miles\n      example: 0\n    Pilot:\n      type: boolean\n      description: is the user in pilot\n      example: true\n    favoriteCustomerBranch:\n      $ref: \"#/components/schemas/Branch\"\n    favoriteCustomerNumber:\n      $ref: \"#/components/schemas/CustomerNumber\"\n    tradeOnWebService:\n      type: boolean\n      description: is the user assigned to trade on web service\n      example: true\n    CustomersArray:\n      type: array\n      items:\n        type: string\n    profiles:\n      type: array\n      items:\n        type: string\n      example:\n        - 1\n        - 2\n        - 3\nSubscriptionNumber:\n  type: object\n  properties: {}\nWebsiteNumber:\n  type: object\n  properties: {}\nOriginalUser:\n  type: object\n  properties: {}\nBank:\n  type: object\n  properties: {}\nBranch:\n  type: object\n  properties: {}\nIsoDateTime:\n  type: object\n  properties: {}\nIsoDate:\n  type: object\n  properties: {}\nAccountType:\n  type: object\n  properties: {}\nAccountNumber:\n  type: object\n  properties: {}\nPersonalId:\n  type: object\n  properties: {}\nIdType:\n  type: object\n  properties: {}\nCountryCode:\n  type: object\n  properties: {}\nTimeStamp:\n  type: object\n  properties: {}\nCustomerNumber:\n  type: object\n  properties: {}\nPilotsLeumiTrade:\n  type: array\n  items:\n    type: object\nDivisionAffiliation:\n  type: object\n  properties: {}\nCustomerAffiliation:\n  type: object\n  properties: {}\nInvolvementType:\n  type: object\n  properties: {}\nGreenMailIndication:\n  type: object\n  properties: {}\nMailToHomeAdreess:\n  type: object\n  properties: {}\nAuthorizedInformation:\n  type: object\n  properties: {}\nAuthorizedActions:\n  type: object\n  properties: {}\nAuthorizedThirdParty:\n  type: object\n  properties: {}\nUser-id-ref:\n  type: object\n  properties: {}\n",
+      "schemas": {
+        "LoginResponse": {
+          "type": "object",
+          "properties": {
+            "subscriptionNumber": {
+              "$ref": "#/components/schemas/SubscriptionNumber"
+            },
+            "originalUserId": {
+              "$ref": "#/components/schemas/OriginalUser"
+            },
+            "firstName": {
+              "type": "string",
+              "description": "customer first name",
+              "example": "בינה",
+              "maxLength": 14,
+              "nullable": true
+            },
+            "lastName": {
+              "type": "string",
+              "description": "customer last name",
+              "example": "באגד",
+              "maxLength": 20,
+              "nullable": true
+            },
+            "foreignFirstName": {
+              "type": "string",
+              "description": "english customer first name",
+              "example": "bina",
+              "maxLength": 14,
+              "nullable": true
+            },
+            "foreignLastName": {
+              "type": "string",
+              "description": "english customer last name",
+              "example": "bagad",
+              "maxLength": 20,
+              "nullable": true
+            },
+            "dateOfBirth": {
+              "$ref": "#/components/schemas/IsoDate"
+            },
+            "feeBank": {
+              "$ref": "#/components/schemas/Bank"
+            },
+            "feeBranchNumber": {
+              "$ref": "#/components/schemas/Branch"
+            },
+            "feeAcountType": {
+              "$ref": "#/components/schemas/AccountType"
+            },
+            "feeAcountNumber": {
+              "$ref": "#/components/schemas/AccountNumber"
+            },
+            "leadingBank": {
+              "$ref": "#/components/schemas/Bank"
+            },
+            "leadingBranchNumber": {
+              "$ref": "#/components/schemas/Branch"
+            },
+            "leadingAccountType": {
+              "$ref": "#/components/schemas/AccountType"
+            },
+            "leadingAccountNumber": {
+              "$ref": "#/components/schemas/AccountNumber"
+            },
+            "userOpeningDate": {
+              "$ref": "#/components/schemas/IsoDate"
+            },
+            "personalId": {
+              "$ref": "#/components/schemas/PersonalId"
+            },
+            "idType": {
+              "$ref": "#/components/schemas/IdType"
+            },
+            "countryCode": {
+              "$ref": "#/components/schemas/CountryCode"
+            },
+            "subscriberSector": {
+              "type": "string",
+              "description": "subscriber business sector",
+              "example": 10,
+              "pattern": "^[0-9]{1,2}$",
+              "nullable": true
+            },
+            "websiteNumber": {
+              "$ref": "#/components/schemas/WebsiteNumber"
+            },
+            "authorizedToOpreations": {
+              "type": "boolean",
+              "description": "is authorized to operate in the web\\application",
+              "example": true
+            },
+            "subscriberPhoneAuthorization": {
+              "type": "string",
+              "description": "the type of autorization to perform operations over the phone",
+              "example": 3,
+              "nullable": true
+            },
+            "subscriberTimestamp": {
+              "$ref": "#/components/schemas/IsoDateTime"
+            },
+            "identificationQuestions": {
+              "type": "boolean",
+              "description": "is the user has identification questions",
+              "example": false
+            },
+            "divisionType": {
+              "type": "string",
+              "description": "calculated division type",
+              "example": "BI",
+              "nullable": true
+            },
+            "subscriberInvolvement": {
+              "type": "string",
+              "description": "subcriber ownership",
+              "example": 1,
+              "nullable": true
+            },
+            "greenMail": {
+              "type": "string",
+              "description": "Reference to the screen reading miles when there are non called miles",
+              "example": 0
+            },
+            "Pilot": {
+              "type": "boolean",
+              "description": "is the user in pilot",
+              "example": true
+            },
+            "favoriteCustomerBranch": {
+              "$ref": "#/components/schemas/Branch"
+            },
+            "favoriteCustomerNumber": {
+              "$ref": "#/components/schemas/CustomerNumber"
+            },
+            "tradeOnWebService": {
+              "type": "boolean",
+              "description": "is the user assigned to trade on web service",
+              "example": true
+            },
+            "CustomersArray": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "profiles": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "example": [
+                1,
+                2,
+                3
+              ]
+            }
+          }
+        },
+        "SubscriptionNumber": {
+          "type": "object",
+          "properties": {}
+        },
+        "WebsiteNumber": {
+          "type": "object",
+          "properties": {}
+        },
+        "OriginalUser": {
+          "type": "object",
+          "properties": {}
+        },
+        "Bank": {
+          "type": "object",
+          "properties": {}
+        },
+        "Branch": {
+          "type": "object",
+          "properties": {}
+        },
+        "IsoDateTime": {
+          "type": "object",
+          "properties": {}
+        },
+        "IsoDate": {
+          "type": "object",
+          "properties": {}
+        },
+        "AccountType": {
+          "type": "object",
+          "properties": {}
+        },
+        "AccountNumber": {
+          "type": "object",
+          "properties": {}
+        },
+        "PersonalId": {
+          "type": "object",
+          "properties": {}
+        },
+        "IdType": {
+          "type": "object",
+          "properties": {}
+        },
+        "CountryCode": {
+          "type": "object",
+          "properties": {}
+        },
+        "TimeStamp": {
+          "type": "object",
+          "properties": {}
+        },
+        "CustomerNumber": {
+          "type": "object",
+          "properties": {}
+        },
+        "PilotsLeumiTrade": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "DivisionAffiliation": {
+          "type": "object",
+          "properties": {}
+        },
+        "CustomerAffiliation": {
+          "type": "object",
+          "properties": {}
+        },
+        "InvolvementType": {
+          "type": "object",
+          "properties": {}
+        },
+        "GreenMailIndication": {
+          "type": "object",
+          "properties": {}
+        },
+        "MailToHomeAdreess": {
+          "type": "object",
+          "properties": {}
+        },
+        "AuthorizedInformation": {
+          "type": "object",
+          "properties": {}
+        },
+        "AuthorizedActions": {
+          "type": "object",
+          "properties": {}
+        },
+        "AuthorizedThirdParty": {
+          "type": "object",
+          "properties": {}
+        },
+        "User-id-ref": {
+          "type": "object",
+          "properties": {}
+        }
+      }
     }
   ]
 }

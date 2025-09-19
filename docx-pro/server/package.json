@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "docx": "^9.5.1",
@@ -19,8 +20,10 @@
     "html-entities": "^2.6.0",
     "html-to-docx": "^1.8.0",
     "lowdb": "^7.0.1",
+    "monaco-editor": "^0.53.0",
     "nanoid": "^5.1.5",
-    "node-html-parser": "^7.0.1"
+    "node-html-parser": "^7.0.1",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",

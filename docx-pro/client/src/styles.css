@@ -1,13 +1,10 @@
 :root{
-  /* מידות A4 (לסימולציה/פרינט בלבד) */
   --page-w-a4: 210mm;
   --page-h-a4: 297mm;
   --page-pad-a4: 20mm;
 
-  /* תצוגת מסך מלאה: */
-  --max: 1600px; /* רוחב עבודה מקסימלי (אפשר להגדיל אם תרצה) */
+  --max: 1600px;
 
-  /* צבעים/טיפוגרפיה */
   --bg: #f6f7fb;
   --panel: #ffffff;
   --text: #0b1220;
@@ -37,7 +34,6 @@ body{
   direction: rtl;
 }
 
-/* נטרול דמו של Vite */
 body,#root{ display:block !important; max-width:none !important; padding:0 !important; margin:0 !important; text-align:initial !important; }
 
 /* ====== HEADER ====== */
@@ -47,81 +43,81 @@ body,#root{ display:block !important; max-width:none !important; padding:0 !impo
   background:rgba(255,255,255,.9);
   border-bottom:1px solid var(--border);
 }
-.container{ width:100%; max-width:var(--max); margin:0 auto; padding:14px 22px; }
-.toprow{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+
+/* כיווץ ריווח בהדר */
+.container{ width:100%; max-width:var(--max); margin:0 auto; padding:10px 16px; }
+.toprow{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 .process-pill{
-  padding:10px 14px; background:var(--panel); border:1px solid var(--border);
+  padding:8px 12px; background:var(--panel); border:1px solid var(--border);
   border-radius:999px; font-weight:600; box-shadow: var(--shadow-md);
 }
 
-/* ====== STEPS/ACTIONS ====== */
-.steps{ display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; }
+/* ====== STEPS + ACTIONS בשורה אחת ====== */
+.steps{ display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
 .step{
-  padding:10px 14px; background:var(--panel); border:1px solid var(--border);
+  padding:8px 12px; background:var(--panel); border:1px solid var(--border);
   border-radius:var(--radius-md); color:var(--muted); cursor:pointer; transition:.15s ease;
 }
 .step:hover{ transform:translateY(-1px); box-shadow:var(--shadow-md); }
 .step.active{ color:#0b2a75; border-color:rgba(37,99,235,.35); background:#eef2ff; font-weight:600; }
 
-.actions{
-  margin-top:12px; padding-top:12px; border-top:1px dashed var(--border);
-  display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:center;
+/* שורה משולבת */
+.actions-inline{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:8px;
 }
-.actions .right{ justify-self:start; display:flex; gap:10px; }
-.actions .left{ justify-self:end; display:flex; gap:10px; }
 
+/* מיכלים פנימיים */
+.steps-left{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.steps-right{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* ====== כפתורים ====== */
 .btn{
   appearance:none; cursor:pointer;
   border:1px solid var(--border); background:var(--panel); color:var(--text);
-  padding:10px 16px; border-radius:var(--radius-md);
+  padding:8px 12px; border-radius:var(--radius-md);
   transition:.15s ease; box-shadow:0 2px 0 rgba(0,0,0,.02);
 }
 .btn:hover{ transform:translateY(-1px); box-shadow:var(--shadow-md); }
 .btn[disabled]{ opacity:.6; cursor:not-allowed; }
-.btn-primary{ background:linear-gradient(180deg, var(--primary), var(--primary-2)); color:#fff; border-color:transparent; }
+.btn.primary, .btn-primary{ background:linear-gradient(180deg, var(--primary), var(--primary-2)); color:#fff; border-color:transparent; }
 
 /* ====== WORKSPACE ====== */
-.main{ padding:24px 16px 48px; }
-
-/* עמוד עבודה */
+.main{ padding:18px 12px 36px; }
 .stage{ width:100%; max-width:var(--max); margin:0 auto; }
 
-/* ברירת מחדל: תצוגת מסך מלאה – העמוד ממלא כמעט את כל הרוחב */
 .workspace.full .page{
   width:100%;
   background:var(--panel); border:1px solid var(--border);
   border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);
-  padding:28px; margin:18px auto 48px;
+  padding:24px; margin:14px auto 40px;
   min-height: min(1100px, calc(100vh - 220px));
 }
 
-/* אופציה: סימולציית A4 בתוך הדפדפן */
 .workspace.a4 .page{
   width:var(--page-w-a4); min-height:var(--page-h-a4);
   max-width:calc(100vw - 48px);
   background:var(--panel); border:1px solid var(--border);
   border-radius:var(--radius-xl); box-shadow:var(--shadow-xl);
-  padding:var(--page-pad-a4); margin:18px auto 48px;
+  padding:var(--page-pad-a4); margin:14px auto 40px;
 }
 
-/* כותרת המסמך */
 .input-title{
   width:100%; padding:12px 14px; background:#fbfcff;
   border:1px solid var(--border); border-radius:var(--radius-md);
   font-size:18px; font-weight:600; margin-bottom:14px;
 }
 
-/* ====== TinyMCE – טולבר עטיף ורווח קומפקטי ====== */
-.tiny-wrap .tox-tinymce{
-  border-radius: 12px; box-shadow: var(--shadow-md);
-}
-.tiny-wrap .tox .tox-toolbar__primary{
-  flex-wrap: wrap; gap: 4px 6px;
-}
+/* TinyMCE */
+.tiny-wrap .tox-tinymce{ border-radius: 12px; box-shadow: var(--shadow-md); }
+.tiny-wrap .tox .tox-toolbar__primary{ flex-wrap: wrap; gap: 4px 6px; }
 .tiny-wrap .tox .tox-tbtn{ padding-inline: 6px; }
 .tiny-wrap .tox .tox-editor-header{ position: sticky; top: 0; z-index: 10; }
 
-/* ====== Swagger / Code ====== */
+/* Swagger / Code */
 .swagger-area{
   width:100%; height:640px; resize:vertical;
   font-family:var(--mono); font-size:14px; line-height:1.6;
@@ -133,10 +129,167 @@ body,#root{ display:block !important; max-width:none !important; padding:0 !impo
   border:1px solid #0f172a;
 }
 
-/* פרינט – תמיד A4 (רלוונטי רק להדפסה, הייצוא לוורד מתבצע בשרת) */
+/* פרינט */
 @page { size: A4; margin: 20mm; }
 
 /* מובייל */
 @media (max-width:1024px){
-  .actions{ grid-template-columns:1fr; }
+  .actions-inline{ flex-direction:column; align-items:stretch; }
+  .steps-right{ justify-content:flex-start; }
+}
+
+/* =========================================================
+   Schema Builder / Editor – Modern Styling
+   ========================================================= */
+.schema-accordion {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+.schema-accordion > summary {
+  list-style: none;
+}
+.schema-accordion-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(180deg, #f9fbff, #f3f6ff);
+  border-bottom: 1px solid var(--border);
+}
+.schema-accordion[open] .schema-accordion-summary {
+  background: #fff;
+}
+
+.tag {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #0b2a75;
+  border: 1px solid rgba(37,99,235,.25);
+}
+.inline { font-family: var(--mono); background: #f1f5ff; padding: 2px 6px; border-radius: 8px; }
+
+.badge {
+  display: inline-flex; align-items: center;
+  font-size: 12px; border-radius: 999px; padding: 4px 10px;
+  border: 1px solid;
+}
+.badge.ok { color:#1b7738; background:#e8f6ed; border-color:#b8e5c7; }
+.badge.error { color:#8a1420; background:#fde7ea; border-color:#f4b8c0; }
+.muted { color: var(--muted); }
+.small { font-size: 12px; }
+
+/* קופסת הסכמה */
+.schema-box{
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  background: #fff;
+}
+
+/* פס עליון: לשוניות+פעולות */
+.schema-toolbar{
+  display:flex; align-items:center; gap:12px; margin-bottom:8px;
+}
+.schema-tabs{ display:flex; gap:6px; }
+.schema-right{ display:flex; gap:8px; align-items:center; margin-inline-start:auto; }
+
+/* עורך טקסט */
+.schema-editor-shell{
+  border:1px solid var(--border);
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow: var(--shadow-md);
+}
+.schema-status{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 10px; border-top:1px solid var(--border);
+}
+
+/* Builder */
+.schema-builder{
+  border:1px solid var(--border); border-radius:12px; padding:12px; background:#fff;
+}
+.schema-builder-head{
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;
+}
+.schema-builder-head .title{ font-weight:700; }
+
+/* כרטיס סכמה */
+.schema-card{
+  border:1px dashed var(--border);
+  border-radius:12px;
+  padding:10px;
+  margin-bottom:12px;
+  background:#fff;
+  box-shadow: 0 3px 10px rgba(2, 6, 23, .04);
+}
+.schema-card-head{
+  display:grid;
+  grid-template-columns: 28px 1fr 160px auto;
+  gap:8px;
+  align-items:center;
+}
+.row-actions{ display:flex; justify-content:flex-end; gap:6px; }
+.drag-handle{
+  width:24px; height:24px; display:flex; align-items:center; justify-content:center;
+  cursor:grab; user-select:none; color:#98a2b3; border:1px dashed var(--border); border-radius:6px; background:#f8fafc;
+}
+
+/* אזור שדות */
+.props-wrap{ margin-top:10px; padding-inline-start:18px; }
+.props-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.props-head .title{ font-weight:600; }
+
+/* שורת כותרות */
+.prop-row.header{
+  font-weight:600; color:var(--muted);
+  background: #f8fafc;
+}
+
+/* שורת שדה */
+.prop-row{
+  display:grid;
+  grid-template-columns: 28px 200px 120px 110px 1fr 1fr 90px 1fr 260px 80px;
+  gap:6px; align-items:center;
+  padding:6px 6px; margin-bottom:6px;
+  border:1px solid var(--border); border-radius:10px;
+  background:#fff;
+  box-shadow: 0 1px 6px rgba(2, 6, 23, .04);
+}
+.prop-row .cell.name,
+.prop-row .cell.type,
+.prop-row .cell.desc,
+.prop-row .cell.example,
+.prop-row .cell.num,
+.prop-row .cell.pattern,
+.prop-row .cell.ref{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
+}
+.prop-row .cell.flags{
+  display:flex; gap:10px; justify-content:center; white-space:nowrap;
+}
+.flag{ display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#555; }
+.flag.muted{ opacity:.5; }
+.center{ text-align:center; }
+
+/* שדות קלט גנריים */
+.schema-card .input{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:#fff;
 }

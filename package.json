@@ -3,9 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && node server.mjs",
-    "client": "cd client && npm run dev"
+    "bootstrap": "npm --prefix ./server i && npm --prefix ./client i",
+    "dev": "concurrently -r -c blue,green \"npm --prefix ./server run dev\" \"npm --prefix ./client run dev\"",
+    "dev:server": "npm --prefix ./server run dev",
+    "dev:client": "npm --prefix ./client run dev"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"

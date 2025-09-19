@@ -11,13 +11,12 @@ import { HEADER_CANDIDATES } from "../constants";
  *  - onClone()
  *  - onDelete()
  */
-export default function RequestEditor({ r, idx, rtl, onChange, onClone, onDelete }) {
-  const std = Array.isArray(r.stdHeaders) ? r.stdHeaders : [];
+export default function RequestEditor({ r = {}, idx, rtl, onChange, onClone, onDelete }) {
+  const std = Array.isArray(r?.stdHeaders) ? r.stdHeaders : [];
 
   const allSelected = HEADER_CANDIDATES.every((k) => std.includes(k));
   const someSelected = std.length > 0 && !allSelected;
 
-  // כדי להציג מצב "חלקי" על הצ'קבוקס של "בחר את כולם"
   const selectAllRef = useRef(null);
   useEffect(() => {
     if (selectAllRef.current) {
@@ -73,7 +72,7 @@ export default function RequestEditor({ r, idx, rtl, onChange, onClone, onDelete
         </div>
       </div>
 
-      {/* שורה 2: summary + description + operationId (חדש) */}
+      {/* שורה 2: summary + description + operationId */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 220px", gap: 8, marginTop: 8 }}>
         <div>
           <label style={styles.sublabel}>summary</label>
@@ -131,19 +130,8 @@ export default function RequestEditor({ r, idx, rtl, onChange, onClone, onDelete
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
-        <div>
-          <label style={styles.sublabel}>Headers (טקסט JSON)</label>
-          <textarea
-            style={styles.textarea}
-            placeholder='{"Authorization":"Bearer ..."}'
-            value={r.headers || ""}
-            onChange={(e) => onChange({ headers: e.target.value })}
-          />
-          <div style={styles.hint}>
-            * הצ׳קבוקסים נשמרים בשדה <code>stdHeaders</code>. ניתן לשלב כאן ערכים ידניים/דינמיים.
-          </div>
-        </div>
+      {/* שליש / שליש / שליש */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 10 }}>
         <div>
           <label style={styles.sublabel}>Request Body (טקסט JSON)</label>
           <textarea
@@ -153,17 +141,29 @@ export default function RequestEditor({ r, idx, rtl, onChange, onClone, onDelete
             onChange={(e) => onChange({ request: e.target.value })}
           />
         </div>
+
+        <div>
+          <label style={styles.sublabel}>Headers (טקסט JSON)</label>
+          <textarea
+            style={styles.textarea}
+            placeholder='{"Authorization":"Bearer ..."}'
+            value={r.headers || ""}
+            onChange={(e) => onChange({ headers: e.target.value })}
+          />
+        </div>
+
+        <div>
+          <label style={styles.sublabel}>Response Example (טקסט JSON)</label>
+          <textarea
+            style={styles.textarea}
+            placeholder='[{"id":1,"name":"item"}]'
+            value={r.response || ""}
+            onChange={(e) => onChange({ response: e.target.value })}
+          />
+        </div>
       </div>
 
-      <div style={{ marginTop: 8 }}>
-        <label style={styles.sublabel}>Response Example (טקסט JSON)</label>
-        <textarea
-          style={styles.textarea}
-          placeholder='[{"id":1,"name":"item"}]'
-          value={r.response || ""}
-          onChange={(e) => onChange({ response: e.target.value })}
-        />
-      </div>
+      {/* הוסר: Schema ברמת הבקשה – עכשיו יש אחד לכל הפרויקט ב-ProjectModal */}
 
       <div style={{ textAlign: "start", color: "var(--muted)" }}>#{idx + 1}</div>
     </div>
@@ -196,5 +196,4 @@ const styles = {
     resize: "vertical",
     fontFamily: "monospace",
   },
-  hint: { fontSize: 12, color: "var(--muted)", marginTop: 6 },
 };

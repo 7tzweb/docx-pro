@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import RichTextEditor from "./RichTextEditor";
 import RequestEditor from "./RequestEditor";
 import SchemaBuilder from "./SchemaBuilder";
+import YAML from "yaml";
 
 /**
  * ProjectModal – יצירה/עריכת פרויקט מלא.
@@ -16,11 +17,12 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
   const [requests, setRequests] = useState([]);
   const [extra, setExtra] = useState({ vitality: false, ping: false });
 
-  // טקסט הסכמה (JSON/YAML) נשמר ברמת המודאל – נשלח לשרת בעת שמירה
+  // Schema text + params
   const [schemaText, setSchemaText] = useState("");
-  const [schemaView] = useState("yaml"); // נשמר ל־SchemaBuilder; ניתן להחליף אם תרצה
+  const [schemaView] = useState("yaml");
   const [schemasCount, setSchemasCount] = useState(0);
   const [schemaError, setSchemaError] = useState("");
+  const [schemaParams, setSchemaParams] = useState([]); // ← שמות כל הסכמות לבחירה
 
   useEffect(() => {
     if (!open) return;
@@ -33,14 +35,21 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
       setRequests(reqs);
       setExtra({ vitality: !!initial?.extra?.vitality, ping: !!initial?.extra?.ping });
 
-      // העדפה לטקסט סכמה (אם שמור בפרויקט)
       if (typeof initial?.schema === "string" && initial.schema.trim()) {
         setSchemaText(initial.schema);
+        computeParams(initial.schema);
       } else if (initial?.schemas && typeof initial.schemas === "object") {
-        try { setSchemaText(require("yaml").stringify(initial.schemas, { indent: 2 })); }
-        catch { setSchemaText(""); }
+        try {
+          const t = YAML.stringify(initial.schemas, { indent: 2 });
+          setSchemaText(t);
+          setSchemaParams(Object.keys(initial.schemas || {}));
+        } catch {
+          setSchemaText("");
+          setSchemaParams([]);
+        }
       } else {
         setSchemaText("");
+        setSchemaParams([]);
       }
       setSchemaError("");
       setSchemasCount(countSchemasSafe(initial?.schemas));
@@ -54,13 +63,13 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
       setSchemaText("");
       setSchemaError("");
       setSchemasCount(0);
+      setSchemaParams([]);
     }
   }, [open, isEdit, initial]);
 
   const validEmail = useMemo(() => /^\S+@\S+\.\S+$/.test(managerEmail), [managerEmail]);
   const canSave = name.trim().length > 0 && validEmail && !schemaError;
 
-  // ===== Requests helpers =====
   function updateRequest(idx, patch) {
     setRequests((prev) => {
       const next = [...prev];
@@ -84,6 +93,30 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
     setRequests((prev) => [...prev, defaultRequest()]);
   }
 
+  // מחשב שמות סכמות מתוך טקסט
+  function computeParams(text) {
+    try {
+      const raw = String(text || "").trim();
+      if (!raw) { setSchemaParams([]); return; }
+      let obj;
+      if (raw.startsWith("{") || raw.startsWith("[")) {
+        obj = JSON.parse(raw);
+      } else {
+        obj = YAML.parse(raw);
+      }
+      if (obj && typeof obj === "object" && obj.schemas && typeof obj.schemas === "object") {
+        obj = obj.schemas;
+      }
+      const keys = obj && typeof obj === "object" ? Object.keys(obj) : [];
+      setSchemaParams(keys);
+      setSchemasCount(keys.length);
+      setSchemaError("");
+    } catch (e) {
+      setSchemaParams([]);
+      setSchemaError(String(e?.message || e));
+    }
+  }
+
   // ===== Save =====
   async function handleSave() {
     if (!canSave) return;
@@ -94,7 +127,7 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
       introText: introText || "",
       requests,
       extra: { ...extra },
-      schema: schemaText || "", // השרת ייצור components.schemas מתוך זה
+      schema: schemaText || "", // השרת יפיק components.schemas על בסיס זה
     };
     await onSave?.(payload);
   }
@@ -148,6 +181,7 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
             r={req || {}}
             idx={idx}
             rtl={rtl}
+            schemaParams={schemaParams}
             onChange={(patch) => updateRequest(idx, patch)}
             onClone={() => cloneRequest(idx)}
             onDelete={() => deleteRequest(idx)}
@@ -163,7 +197,6 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
           <summary className="schema-accordion-summary">
             <span className="tag">Schema</span>
             <span className="muted"> יצירת סכמה מלאה</span>
-            {/* <code className="inline">components.schemas</code> */}
             {schemaError ? (
               <span className="badge error" style={{ marginInlineStart: 8 }}>שגיאה</span>
             ) : (
@@ -174,8 +207,12 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
           <SchemaBuilder
             initialText={schemaText}
             initialView={schemaView}
-            onTextChange={(t) => setSchemaText(t)}
-            onStats={({ count, error }) => { setSchemasCount(count ?? 0); setSchemaError(error ? String(error) : ""); }}
+            onTextChange={(t) => { setSchemaText(t); computeParams(t); }}
+            onStats={({ count, error, params }) => {
+              setSchemasCount(count ?? 0);
+              setSchemaError(error ? String(error) : "");
+              if (Array.isArray(params)) setSchemaParams(params);
+            }}
           />
         </details>
 
@@ -203,7 +240,7 @@ export default function ProjectModal({ open, mode = "create", initial, rtl = tru
   );
 }
 
-/* ===== helpers (קצרים שנשארו במודאל) ===== */
+/* ===== helpers ===== */
 function defaultRequest() {
   return {
     id: cryptoRandomId(),
@@ -216,6 +253,8 @@ function defaultRequest() {
     summary: "",
     description: "",
     operationId: "",
+    requestRefs: [],
+    responseRefs: [],
   };
 }
 function countSchemasSafe(o) {
@@ -235,7 +274,7 @@ function Labeled({ label, children }) {
   );
 }
 
-/* ===== styles מקומיים (ללא שינוי הקיים) ===== */
+/* ===== styles מקומיים ===== */
 const backdropStyle = {
   position: "fixed",
   inset: 0,

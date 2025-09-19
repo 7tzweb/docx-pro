@@ -47,6 +47,19 @@ function buildComponentsParameters(allHeaders) {
   return lines.join("\n");
 }
 
+function emitOneOfOrRef(refs = []) {
+  if (!Array.isArray(refs) || refs.length === 0) return "";
+  if (refs.length === 1) {
+    return `${IND(6)}$ref: '#/components/schemas/${refs[0]}'`;
+  }
+  const lines = [];
+  lines.push(`${IND(6)}oneOf:`);
+  for (const r of refs) {
+    lines.push(`${IND(7)}- $ref: '#/components/schemas/${r}'`);
+  }
+  return lines.join("\n");
+}
+
 function buildPathFromRequest(req) {
   const url = String(req?.url || "/path").trim() || "/path";
   const method = String(req?.method || "GET").toLowerCase();
@@ -68,13 +81,41 @@ function buildPathFromRequest(req) {
   lines.push(`${IND(3)}# jwt security per method`);
   lines.push(`${IND(3)}#security:`);
   lines.push(`${IND(3)}#  - BearerAuth: []`);
+
   if (uniqueHeaders.length) {
     lines.push(`${IND(3)}parameters:`);
     for (const h of uniqueHeaders) lines.push(`${IND(4)}- $ref: '#/components/parameters/${h}'`);
   }
+
+  // Request Body – לפי בחירות מה־UI (requestRefs)
+  const reqRefs = Array.isArray(req?.requestRefs) ? req.requestRefs : [];
+  if ((method === "post" || method === "put" || method === "patch") && reqRefs.length) {
+    lines.push(`${IND(3)}requestBody:`);
+    lines.push(`${IND(4)}required: true`);
+    lines.push(`${IND(4)}content:`);
+    lines.push(`${IND(5)}application/json:`);
+    lines.push(`${IND(6)}schema:`);
+    lines.push(emitOneOfOrRef(reqRefs));
+  }
+
+  // Responses
   lines.push(`${IND(3)}responses:`);
   lines.push(`${IND(4)}'200':`);
   lines.push(`${IND(5)}description: Successful`);
+  const resRefs = Array.isArray(req?.responseRefs) ? req.responseRefs : [];
+  if (resRefs.length) {
+    lines.push(`${IND(5)}content:`);
+    lines.push(`${IND(6)}application/json:`);
+    lines.push(`${IND(7)}schema:`);
+    if (resRefs.length === 1) {
+      lines.push(`${IND(8)}$ref: '#/components/schemas/${resRefs[0]}'`);
+    } else {
+      lines.push(`${IND(8)}oneOf:`);
+      for (const r of resRefs) {
+        lines.push(`${IND(9)}- $ref: '#/components/schemas/${r}'`);
+      }
+    }
+  }
   return lines.join("\n");
 }
 
@@ -107,7 +148,8 @@ function buildVitalityPing(extra = {}) {
   return lines.join("\n");
 }
 
-/* הזרקת סכמות הפרויקט אל components.schemas */
+/* הזרקת סכמות הפרויקט אל components.schemas
+   שים לב: הקוד מניח שהשרת ממיר project.schema → project.schemas (אובייקט). */
 function emitProjectSchemasBlock(project = {}) {
   const obj = project?.schemas;
   if (!obj || typeof obj !== "object" || Array.isArray(obj) || !Object.keys(obj).length) return "";
@@ -144,7 +186,7 @@ export function buildSwaggerFromProject(project = {}) {
   y.push(`${IND(2)}name: ${contactName}`);
   y.push(`${IND(2)}email: ${email || "api@example.com"}`);
   y.push(`${IND(2)}# leumi openapi extensions`);
-  y.push(`${IND(1)}x-jira-ticket: ${jira || "APIA-8584"}`); // ← מוזרק מה-UI (עם fallback)
+  y.push(`${IND(1)}x-jira-ticket: ${jira || "APIA-8584"}`);
   y.push(`${IND(1)}x-api-template: TMPLT_Base_1.2.0 # do not change`);
   y.push(`${IND(1)}x-api-environment: campus  # default: campus`);
   y.push(`${IND(1)}x-api-organization: leumi #default: leumi`);
@@ -199,7 +241,7 @@ export function buildSwaggerFromProject(project = {}) {
   y.push(`${IND(3)}type: string`);
   y.push(`${IND(3)}example: K4F6TRW`);
 
-  // === הזרקה של סכמות הפרויקט (בסוף הקובץ תחת components.schemas) ===
+  // הזרקת הסכמות של הפרויקט – דורש project.schemas מהשרת
   const schemasBlock = emitProjectSchemasBlock(project);
   if (schemasBlock) y.push(schemasBlock);
 

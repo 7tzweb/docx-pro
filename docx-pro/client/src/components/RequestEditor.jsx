@@ -1,17 +1,23 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { HEADER_CANDIDATES } from "../constants";
 
 /**
  * עורך של בקשה אחת במודאל הפרויקט.
- * props:
- *  - r: אובייקט בקשה { id, url, method, headers, request, response, stdHeaders?, summary?, description?, operationId? }
- *  - idx: אינדקס (לתצוגה)
- *  - rtl: האם RTL
- *  - onChange(patch)
- *  - onClone()
- *  - onDelete()
+ * r: {
+ *   id, url, method, headers, request, response, stdHeaders?,
+ *   summary?, description?, operationId?,
+ *   requestRefs?: string[], responseRefs?: string[]
+ * }
  */
-export default function RequestEditor({ r = {}, idx, rtl, onChange, onClone, onDelete }) {
+export default function RequestEditor({
+  r = {},
+  idx,
+  rtl,
+  onChange,
+  onClone,
+  onDelete,
+  schemaParams = [],
+}) {
   const std = Array.isArray(r?.stdHeaders) ? r.stdHeaders : [];
 
   const allSelected = HEADER_CANDIDATES.every((k) => std.includes(k));
@@ -33,6 +39,28 @@ export default function RequestEditor({ r = {}, idx, rtl, onChange, onClone, onD
     onChange({
       stdHeaders: allSelected ? [] : [...HEADER_CANDIDATES],
     });
+  };
+
+  /* ----- בחירת רפרנסים לסכמה (רב-בחירה) ----- */
+  const [openReqMenu, setOpenReqMenu] = useState(false);
+  const [openResMenu, setOpenResMenu] = useState(false);
+  const requestRefs = Array.isArray(r?.requestRefs) ? r.requestRefs : [];
+  const responseRefs = Array.isArray(r?.responseRefs) ? r.responseRefs : [];
+
+  const hasParams = (schemaParams || []).length > 0;
+
+  const toggleRef = (kind, name) => {
+    if (kind === "req") {
+      const next = requestRefs.includes(name)
+        ? requestRefs.filter((x) => x !== name)
+        : [...requestRefs, name];
+      onChange({ requestRefs: next });
+    } else {
+      const next = responseRefs.includes(name)
+        ? responseRefs.filter((x) => x !== name)
+        : [...responseRefs, name];
+      onChange({ responseRefs: next });
+    }
   };
 
   return (
@@ -132,8 +160,50 @@ export default function RequestEditor({ r = {}, idx, rtl, onChange, onClone, onD
 
       {/* שליש / שליש / שליש */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 10 }}>
+        {/* Request Body + קישור לרפרנסים */}
         <div>
-          <label style={styles.sublabel}>Request Body (טקסט JSON)</label>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <label style={styles.sublabel}>Request Body (טקסט JSON)</label>
+            <div style={{ position: "relative" }}>
+              <button
+                className="btn"
+                onClick={() => setOpenReqMenu((v) => !v)}
+                title="קישור ל־ref$ מתוך הסכמה"
+              >
+                {hasParams ? "פרמטרים מסכמה" : "אין פרמטרים בסכמה"}
+              </button>
+              {openReqMenu && (
+                <div style={styles.menu} onMouseLeave={() => setOpenReqMenu(false)}>
+                  {hasParams ? (
+                    schemaParams.map((name) => (
+                      <label key={name} style={styles.menuItem}>
+                        <input
+                          type="checkbox"
+                          checked={requestRefs.includes(name)}
+                          onChange={() => toggleRef("req", name)}
+                        />
+                        <span>{name}</span>
+                      </label>
+                    ))
+                  ) : (
+                    <div style={{ padding: 8, color: "var(--muted)" }}>אין פרמטרים בסכמה</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* chips נבחרים */}
+          {requestRefs.length > 0 && (
+            <div style={styles.chips}>
+              {requestRefs.map((n) => (
+                <span key={n} style={styles.chip} onClick={() => toggleRef("req", n)}>
+                  {n} ✕
+                </span>
+              ))}
+            </div>
+          )}
+
           <textarea
             style={styles.textarea}
             placeholder='{"name":"item"}'
@@ -142,6 +212,7 @@ export default function RequestEditor({ r = {}, idx, rtl, onChange, onClone, onD
           />
         </div>
 
+        {/* Headers (אין רפרנס לסכמה בשלב זה – רק טקסט חופשי) */}
         <div>
           <label style={styles.sublabel}>Headers (טקסט JSON)</label>
           <textarea
@@ -152,8 +223,50 @@ export default function RequestEditor({ r = {}, idx, rtl, onChange, onClone, onD
           />
         </div>
 
+        {/* Response Example + קישור לרפרנסים */}
         <div>
-          <label style={styles.sublabel}>Response Example (טקסט JSON)</label>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <label style={styles.sublabel}>Response Example 200 (טקסט JSON)</label>
+            <div style={{ position: "relative" }}>
+              <button
+                className="btn"
+                onClick={() => setOpenResMenu((v) => !v)}
+                title="קישור ל־ref$ מתוך הסכמה"
+              >
+                {hasParams ? "פרמטרים מסכמה" : "אין פרמטרים בסכמה"}
+              </button>
+              {openResMenu && (
+                <div style={styles.menu} onMouseLeave={() => setOpenResMenu(false)}>
+                  {hasParams ? (
+                    schemaParams.map((name) => (
+                      <label key={name} style={styles.menuItem}>
+                        <input
+                          type="checkbox"
+                          checked={responseRefs.includes(name)}
+                          onChange={() => toggleRef("res", name)}
+                        />
+                        <span>{name}</span>
+                      </label>
+                    ))
+                  ) : (
+                    <div style={{ padding: 8, color: "var(--muted)" }}>אין פרמטרים בסכמה</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* chips נבחרים */}
+          {responseRefs.length > 0 && (
+            <div style={styles.chips}>
+              {responseRefs.map((n) => (
+                <span key={n} style={styles.chip} onClick={() => toggleRef("res", n)}>
+                  {n} ✕
+                </span>
+              ))}
+            </div>
+          )}
+
           <textarea
             style={styles.textarea}
             placeholder='[{"id":1,"name":"item"}]'
@@ -162,8 +275,6 @@ export default function RequestEditor({ r = {}, idx, rtl, onChange, onClone, onD
           />
         </div>
       </div>
-
-      {/* הוסר: Schema ברמת הבקשה – עכשיו יש אחד לכל הפרויקט ב-ProjectModal */}
 
       <div style={{ textAlign: "start", color: "var(--muted)" }}>#{idx + 1}</div>
     </div>
@@ -195,5 +306,37 @@ const styles = {
     background: "#fff",
     resize: "vertical",
     fontFamily: "monospace",
+  },
+  menu: {
+    position: "absolute",
+    top: "110%",
+    insetInlineEnd: 0,
+    zIndex: 20,
+    minWidth: 220,
+    maxHeight: 260,
+    overflow: "auto",
+    background: "#fff",
+    border: "1px solid var(--border)",
+    borderRadius: 12,
+    boxShadow: "0 12px 28px rgba(2,6,23,.12)",
+  },
+  menuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 10px",
+    cursor: "pointer",
+  },
+  chips: { display: "flex", flexWrap: "wrap", gap: 6, margin: "6px 0" },
+  chip: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "4px 8px",
+    border: "1px solid var(--border)",
+    borderRadius: 999,
+    background: "#f8fafc",
+    cursor: "pointer",
+    fontSize: 12,
   },
 };

@@ -11,8 +11,8 @@
           "url": "/AccessEntitlement/user-profile/user/{originalUserId}",
           "method": "GET",
           "headers": "",
-          "request": "dfdfdafddf",
-          "response": "dfdfdf13",
+          "request": "",
+          "response": "",
           "stdHeaders": [
             "x-transaction-id",
             "x-message-id",
@@ -26,7 +26,10 @@
           ],
           "summary": "Receive accounts info and list of relevant profiles.",
           "description": "receive accounts and customers data by subscription number.",
-          "operationId": "accountsInfo"
+          "operationId": "accountsInfo",
+          "responseRefs": [
+            "LoginResponse"
+          ]
         }
       ],
       "extra": {
@@ -34,7 +37,7 @@
         "ping": true
       },
       "createdAt": "2025-09-14T11:30:39.521Z",
-      "updatedAt": "2025-09-19T07:53:52.126Z",
+      "updatedAt": "2025-09-19T11:38:48.293Z",
       "managerEmail": "tsohar.zigdon@bankleumi.co.il",
       "swaggerDescription": "The service gets the folllowing parameters from the login digital process \n    \n        - subscriptionNumber - the user subscribtion number\n\n      and returns \n    \n        subscription Number and relevant data \n      \n          List of customers of the subscription \n      \n            List of related user accounts(JONI) from ODS. \n            \n          List of Profiles\n    \n    Incase the approaching system is Business application or web The service will access the joni business tables, otherwise The service will access the joni private tables\n    Data is retrieved from `##ODS##",
       "jiraTicket": "APIA-8584",
